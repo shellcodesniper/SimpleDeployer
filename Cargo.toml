@@ -1,7 +1,8 @@
 [package]
-name = "simpleDeployer"
+name = "simple-deployer"
 version = "0.0.1"
 edition = "2021"
 author = "KuuWangE"
 
 [dependencies]
+configparser = "3.0.0"

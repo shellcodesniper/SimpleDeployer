@@ -9,4 +9,4 @@ ADD . /app
 RUN cargo build --release --verbose --target-dir "/app/dist"
 
 
-ENTRYPOINT [ "/app/dist/release/simpleDeployer" ]
+ENTRYPOINT [ "/app/dist/release/simple-deployer" ]
