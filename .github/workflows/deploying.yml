@@ -27,7 +27,7 @@ jobs:
         name: Get Version From Cargo.toml
         run: echo "::set-output name=version::$(awk -F'[ ="]+' '$1 == "version" { print $2 }' Cargo.toml)"
       -
-        name: Build Docker and Push to MULTITOOL_API
+        name: Build Docker and Push to Docker SimpleDeploy REPO
         id: docker_build
         uses: docker/build-push-action@v2
         with:
