@@ -32,7 +32,8 @@ pub struct Logging {
   pub logging: bool,
 
   pub controller_logname: String,
-  pub time_rotation: i64,
+  pub logging_path: String,
+  pub logging_prefix: String,
   pub max_file_size_mb: i64,
 
   pub server_identity_prefix: String,

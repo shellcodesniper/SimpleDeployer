@@ -1,6 +1,5 @@
 use std::{fs::File, process::exit};
 use std::io::prelude::*;
-use std::any::Any;
 use configparser::ini::Ini;
 
 use super::parser_interfaces::{ Default, Nginx, Repository, Logging, S3 };
@@ -15,8 +14,8 @@ pub struct ParsedConfig {
 
 impl ParsedConfig {
 
-  pub fn new(cfg_path: Option<&str>) {
-    let config_path = if let Some(x) = cfg_path { x } else { "deployConfig.cfg" };
+  pub fn new(cfg_path: String) -> ParsedConfig {
+    let config_path = &String::from(&cfg_path);
 
     let mut file = File::open(config_path).unwrap();
 
@@ -25,7 +24,6 @@ impl ParsedConfig {
     let mut config = Ini::new();
     let config_parse_result= config.read(contents);
     if let Ok(_) = config_parse_result {
-      println!("CONFIG_PARSE_INIT");
     } else {
       println!("PLEASE CHECK YOUR CONFIG FILE");
       exit(-1);
@@ -59,9 +57,9 @@ impl ParsedConfig {
 
     let logging = Logging {
       logging: (config.get("Logging", "logging").unwrap_or(String::from("no")) == "yes"),
-
+      logging_path: config.get("Logging", "logging_path").unwrap_or(String::from("logs/")),
+      logging_prefix: config.get("Logging", "logging_prefix").unwrap_or(String::from("log_")),
       controller_logname: config.get("Logging", "controller_logname").unwrap_or(String::from("KUUWANGE")),
-      time_rotation: config.getint("Logging", "time_rotation").unwrap().unwrap_or(300),
       max_file_size_mb: config.getint("Logging", "max_file_size_mb").unwrap().unwrap_or(5),
 
       server_identity_prefix: config.get("Logging", "server_identity_prefix").unwrap_or(String::from("KUUWANGE_SERVER")),
@@ -83,6 +81,6 @@ impl ParsedConfig {
       repository,
       logging,
       s3,
-    };
+    }
   }
 }
