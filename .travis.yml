@@ -1,0 +1,16 @@
+language: rust
+rust:
+ - 1.56.0
+
+jobs:
+  allow_failures:
+    - rust-lang
+  fast_finish: true
+
+cache: cargo
+before_cache:
+  - rm -rf "$TRAVIS_HOME/.cargo/registry/src"
+
+script:
+  - cargo build --verbose --workspace
+  - cargo test --verbose --workspace
