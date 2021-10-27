@@ -1,4 +1,5 @@
 pub mod request_interfaces;
+pub mod image;
 
 use serde_json;
 use hyper_tls::HttpsConnector;
@@ -6,13 +7,16 @@ use hyper::Client;
 use hyper::{Body, Method, Request};
 use crate::lib::global::GLOBAL_PARSED_CONFIG_LOCK;
 
+#[allow(unused_imports)]
+use image::*;
+
 #[derive(Default, Debug, Clone)]
 pub struct Registry {
   registry_url: String,
   username: Option<String>,
   password: Option<String>,
   is_authenticated: bool,
-  token: Option<String>,
+  pub token: Option<String>,
 }
 
 impl Registry {
@@ -24,17 +28,16 @@ impl Registry {
       password: config.repository.registry_password.clone(),
       is_authenticated:false,
       token: None,
-      ..Default::default()
     }
   }
 
-  pub async fn login(mut self) {
+  pub async fn login(&mut self) {
     let url = format!("{}/v2/users/login", self.registry_url);
 
     debug!("{}", url);
 
-    let username = self.username.unwrap_or(String::from("anonymous"));
-    let password= self.password.unwrap_or(String::from("anonymous"));
+    let username = (self.username.clone().to_owned()).unwrap_or(String::from("anonymous"));
+    let password= (self.password.clone().to_owned()).unwrap_or(String::from("anonymous"));
 
     let request_body = request_interfaces::RequestLogin {
       username,
@@ -63,6 +66,7 @@ impl Registry {
     }
     let token = result.get("token").unwrap().as_str().unwrap().to_string();
     info!("Success LoggedIn to Registry");
-    self.token = Some(token);
+    (*self).token = Some(token);
   }
+
 }

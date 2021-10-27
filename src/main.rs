@@ -28,13 +28,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
   let _ = docker::Docker::new();
 
-  let registry = registry::Registry::new();
+  let mut registry = registry::Registry::new();
   
-  registry_login(registry).await;
+  registry = registry_login(registry).await;
+
+  registry_get_digest_test(registry.clone()).await;
 
   Ok(())
 }
 
-async fn registry_login(registry: registry::Registry) {
-  let _ = registry.login().await;
+async fn registry_login(mut registry: registry::Registry) -> registry::Registry {
+  let _ = (registry).login().await;
+  registry
+}
+
+async fn registry_get_digest_test(registry: registry::Registry) {
+  let result = registry.clone().get_digest_of_image(String::from("shellcodesniper/multitool_api"), None).await;
+  if result.found {
+    debug!("FOUND : <{}:{}> {}", result.image_url, result.tag, result.digest.unwrap());
+  } else {
+    debug!("NOT FOUND: <{}:{}> {:?}", result.image_url, result.tag, result.digest);
+  }
+  let result = registry.clone().get_digest_of_image(String::from("shellcodesniper/polycube_pan"), Some(String::from("latest"))).await;
+  if result.found {
+    debug!("FOUND : <{}:{}> {}", result.image_url, result.tag, result.digest.unwrap());
+  }
 }
