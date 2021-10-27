@@ -4,12 +4,14 @@ use std::process::exit;
 
 use lib::config;
 use lib::logger;
+use lib::global;
 
 fn print_usage(args: Vec<String>) {
   println!("Usage: {} [config-file-path]", args[0]);
   println!("\tSample: {} ./bin/sampleConfig.cfg", args[0]);
 }
-fn main() {
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
   let args: Vec<String> = std::env::args().collect();
   if args.len() < 2 {
     print_usage(args);
@@ -25,9 +27,7 @@ fn main() {
   let parsed_config: config::parser::ParsedConfig = config::parser::ParsedConfig::new(config_file_path.clone());
   logger::log_init(parsed_config);
 
-  for x in 0..200 {
-      debug!("LOG {}", x);
-      info!("LOG {}", x);
-  }
-  info!("<FINISH LOAD CONFIG>")
+  debug!("TEST");
+
+  Ok(())
 }
