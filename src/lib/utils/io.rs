@@ -1,5 +1,6 @@
 use std::path::Path;
 
+#[allow(dead_code)]
 pub fn check_is_dir(path: &Path) -> bool {
   path.is_dir()
 }

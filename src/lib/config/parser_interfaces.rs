@@ -1,4 +1,5 @@
-pub struct Default {
+#[derive(Debug, Clone, Default)]
+pub struct ConfigDefault {
   pub container_prefix: String,
   pub burnup_waiting: i64,
   pub docker_socket: String,
@@ -11,6 +12,7 @@ pub struct Default {
 
 }
 
+#[derive(Debug, Clone, Default)]
 pub struct Nginx {
   pub nginx: bool,
   pub http_redirect: bool,
@@ -20,14 +22,17 @@ pub struct Nginx {
   pub ssl_privkey: Option<String>,
 }
 
+#[derive(Debug, Clone, Default)]
 pub struct Repository {
-  pub docker_hub_target_repo: String,
+  pub registry_url: String,
+  pub registry_target_repo: String,
 
-  pub docker_hub_login_info: bool,
-  pub docker_hub_username: Option<String>,
-  pub docker_hub_password: Option<String>,
+  pub registry_login_info: bool,
+  pub registry_username: Option<String>,
+  pub registry_password: Option<String>,
 }
 
+#[derive(Debug, Clone, Default)]
 pub struct Logging {
   pub logging: bool,
 
@@ -40,6 +45,7 @@ pub struct Logging {
   pub logging_s3: bool,
 }
 
+#[derive(Debug, Clone, Default)]
 pub struct S3 {
   pub bucket: Option<String>,
   pub access_key: Option<String>,

@@ -2,18 +2,27 @@ use std::{fs::File, process::exit};
 use std::io::prelude::*;
 use configparser::ini::Ini;
 
-use super::parser_interfaces::{ Default, Nginx, Repository, Logging, S3 };
+use crate::lib::global;
 
+use super::parser_interfaces::{ ConfigDefault, Nginx, Repository, Logging, S3 };
+
+#[derive(Debug, Clone, Default)]
 pub struct ParsedConfig {
-  pub default: Default,
+  pub default: ConfigDefault,
   pub nginx: Nginx,
   pub repository: Repository,
   pub logging: Logging,
   pub s3: S3,
 }
 
+
 impl ParsedConfig {
 
+  pub fn empty() -> ParsedConfig {
+    ParsedConfig {
+      ..Default::default()
+    }
+  }
   pub fn new(cfg_path: String) -> ParsedConfig {
     let config_path = &String::from(&cfg_path);
 
@@ -29,10 +38,10 @@ impl ParsedConfig {
       exit(-1);
     };
 
-    let default  = Default {
+    let default  = ConfigDefault {
       container_prefix: config.get("Default", "container_prefix").unwrap_or(String::from("server")),
       burnup_waiting: config.getint("Default", "burnup_waiting").unwrap().unwrap_or(5),
-      docker_socket: config.get("Default", "docker_socket").unwrap_or(String::from("unix://var/run/docker.sock")),
+      docker_socket: config.get("Default", "docker_socket").unwrap_or(String::from("/var/run/docker.sock")),
 
       health_check_interval: config.getint("Default", "health_check_interval").unwrap().unwrap_or(5),
       update_check_interval: config.getint("Default", "update_check_interval").unwrap().unwrap_or(10),
@@ -49,10 +58,11 @@ impl ParsedConfig {
     };
 
     let repository = Repository {
-      docker_hub_target_repo: config.get("Repository", "docker_hub_target_repo").unwrap(),
-      docker_hub_login_info: (config.get("Default", "docker_hub_login_info").unwrap_or(String::from("no")) == "yes"),
-      docker_hub_username: config.get("Repository", "docker_hub_username"),
-      docker_hub_password: config.get("Repository", "docker_hub_password"),
+      registry_url: config.get("Repository", "registry_url").unwrap_or(String::from("hub.docker.com")),
+      registry_target_repo: config.get("Repository", "registry_target_repo").unwrap(),
+      registry_login_info: (config.get("Repository", "registry_login_info").unwrap_or(String::from("no")) == "yes"),
+      registry_username: config.get("Repository", "registry_username"),
+      registry_password: config.get("Repository", "registry_password"),
     };
 
     let logging = Logging {
@@ -75,12 +85,14 @@ impl ParsedConfig {
     };
 
     // * return parsedConfig Structure
-    ParsedConfig {
+    let parsed = ParsedConfig {
       default,
       nginx,
       repository,
       logging,
       s3,
-    }
+    };
+    global::GLOBAL_PARSED_CONFIG_LOCK.set(parsed.clone());
+    parsed
   }
 }

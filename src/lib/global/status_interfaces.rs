@@ -1,3 +1,5 @@
+
+ #[derive(Clone, Copy, Debug)]
 pub enum HealthyStatus {
   Ready,
   Starting,
@@ -5,6 +7,7 @@ pub enum HealthyStatus {
   Unhealthy,
 }
 
+#[derive(Clone, Debug)]
 pub struct SystemStatus {
   pub healthy: HealthyStatus,
   pub container_list: Vec<ContainerStatus>,
@@ -19,6 +22,7 @@ impl SystemStatus {
   }
 }
 
+#[derive(Clone, Debug)]
 pub struct ContainerStatus {
   pub healthy: HealthyStatus,
   container_id: String,

@@ -1,36 +1,42 @@
-#![allow(dead_code)]
+#![allow(dead_code, unused_imports)]
 
-pub mod global_interfaces;
+pub mod status_interfaces;
+pub mod status_implements;
+pub mod parser_implements;
+pub mod docker_implements;
 
 use lazy_static::lazy_static;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::ops::Deref;
 
-use global_interfaces::{ SystemStatus, ContainerStatus };
+use status_interfaces::{ SystemStatus, ContainerStatus };
+use super::config::parser::ParsedConfig;
+use super::docker::Docker;
 
-enum WrapIt<'a, T> {
-  Read(RwLockReadGuard<'a, T>),
-  Write(RwLockWriteGuard<'a, T>)
+use status_implements::*;
+use parser_implements::*;
+use docker_implements::*;
+
+enum WrapIt<'a, T>{
+    Read(RwLockReadGuard<'a, T>),
+    Write(RwLockWriteGuard<'a, T>)
 }
 
 impl<'a, T> Deref for WrapIt<'a, T> {
-  type Target = T;
+    type Target = T;
 
-  fn deref(&self) -> &Self::Target {
-    match self {
-      WrapIt::Read(r_g) => r_g.deref(),
-      WrapIt::Write(w_g) => w_g.deref()
+    fn deref(&self) -> &Self::Target {
+        match self {
+            WrapIt::Read(r_g) => r_g.deref(),
+            WrapIt::Write(w_g) => w_g.deref()
+        }
     }
-  }
 }
 
 
 lazy_static! {
   pub static ref GLOBAL_SYSTEM_STATUS_LOCK: Arc<RwLock<SystemStatus>> = Arc::new(RwLock::new(SystemStatus::new()));
+  pub static ref GLOBAL_PARSED_CONFIG_LOCK: Arc<RwLock<ParsedConfig>> = Arc::new(RwLock::new(ParsedConfig::empty()));
+  pub static ref GLOBAL_DOCKER_LOCK: Arc<RwLock<Docker>> = Arc::new(RwLock::new(Docker::empty()));
 }
 
-impl GLOBAL_SYSTEM_STATUS_LOCK {
-  pub fn write_lock() -> RwLockWriteGuard<'static, SystemStatus> {
-    GLOBAL_SYSTEM_STATUS_LOCK.write().unwrap()
-  }
-}

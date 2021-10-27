@@ -1,18 +1,18 @@
+use super::global;
 use log::LevelFilter;
-use log4rs::append::rolling_file::RollingFileAppender;
-use log4rs::append::rolling_file::policy::compound::CompoundPolicy;
-use log4rs::append::rolling_file::policy::compound::roll::fixed_window::FixedWindowRoller;
-use log4rs::append::rolling_file::policy::compound::trigger::size::SizeTrigger;
-use log4rs::encode::pattern::PatternEncoder;
+use log4rs::append::rolling_file::{ RollingFileAppender, policy };
+use policy::compound::{ CompoundPolicy, roll::fixed_window::FixedWindowRoller, trigger::size::SizeTrigger };
+use log4rs::{ encode::pattern::PatternEncoder, append::console::ConsoleAppender };
 use log4rs::config::{Appender, Config, Root};
-use log4rs::append::console::ConsoleAppender;
 use log4rs::filter::threshold::ThresholdFilter;
 use std::path::Path;
 
 use super::config::parser::ParsedConfig;
 use crate::lib::utils::io;
 
-pub fn log_init(config: ParsedConfig) {
+pub fn log_init() {
+  println!("=== RETRIEVE GLOBAL CONFIG ===");
+  let config: ParsedConfig = global::GLOBAL_PARSED_CONFIG_LOCK.get();
 
   let log_path_str = String::from(&config.logging.logging_path);
   let log_path = Path::new(&log_path_str);

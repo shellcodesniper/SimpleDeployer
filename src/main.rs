@@ -2,9 +2,7 @@
 mod lib;
 use std::process::exit;
 
-use lib::config;
-use lib::logger;
-use lib::global;
+use lib::{ config, docker, registry, utils, logger};
 
 fn print_usage(args: Vec<String>) {
   println!("Usage: {} [config-file-path]", args[0]);
@@ -18,16 +16,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     exit(-1);
   }
   let config_file_path = String::from(&args[1]);
-  let file_exist = lib::utils::io::check_str_file_exist(config_file_path.clone());
+  let file_exist = utils::io::check_str_file_exist(config_file_path.clone());
   if !file_exist {
     println!("\n\n\nFILE NOT EXIST!!!\n\n");
     print_usage(args);
-    exit(-2);
+  exit(-2);
   }
-  let parsed_config: config::parser::ParsedConfig = config::parser::ParsedConfig::new(config_file_path.clone());
-  logger::log_init(parsed_config);
+  config::parser::ParsedConfig::new(config_file_path.clone());
+  logger::log_init();
+  info!("=== INITIALIZING DONE ===");
 
-  debug!("TEST");
+  let _ = docker::Docker::new();
+
+  let registry = registry::Registry::new();
+  
+  registry_login(registry).await;
 
   Ok(())
+}
+
+async fn registry_login(registry: registry::Registry) {
+  let _ = registry.login().await;
 }
