@@ -1,0 +1,74 @@
+// use futures::StreamExt;
+// use shiplift::{PullOptions};
+
+use super::Docker;
+
+#[derive(Debug, Clone, Default)]
+pub struct LocalImageSearchResult {
+  pub found: bool,
+  pub image_url: String,
+  pub image_tag: String,
+  pub image_digest: Option<String>,
+  pub image_id: Option<String>,
+}
+
+impl Docker {
+  pub async fn get_local_image_digest(self, image_url: String, tag: Option<String>) -> LocalImageSearchResult {
+    let search_target_tag= if let Some(tag) = tag { tag } else { String::from("latest") };
+
+    match self.docker.images().list(&Default::default()).await {
+      Ok(results) => {
+        for result in results {
+          let image_id = result.id.clone();
+          let mut repo_image_digest: String = String::new();
+          for repo_digest in result.repo_digests.unwrap() {
+            let repo_digest_split_collect: Vec<&str> = repo_digest.split('@').collect::<Vec<&str>>();
+            if repo_digest_split_collect.len() < 2 {
+              // NOTE maybe this is local image
+              continue;
+            }
+            let mut repo_digest_split = repo_digest.split('@');
+            let _ = repo_digest_split.next().unwrap();
+            // NOTE this is image url part
+            repo_image_digest = repo_digest_split.next().unwrap().to_string();
+          }
+
+          let repo_url_list: Vec<String> = Vec::new();
+          let repo_digest_list: Vec<String> = Vec::new();
+          if result.repo_tags.is_some() {
+            for repo_url in result.repo_tags.unwrap() {
+              let mut repo_url_split = repo_url.split(':');
+              let repo_image_url= repo_url_split.next().unwrap().to_string();
+              let repo_image_tag= repo_url_split.next().unwrap().to_string();
+
+              if image_url.clone() == repo_image_url && search_target_tag.clone() == repo_image_tag {
+                let r = LocalImageSearchResult {
+                  found: true,
+                  image_url: image_url.clone(),
+                  image_tag: search_target_tag.clone(),
+                  image_digest: Some(repo_image_digest.clone()),
+                  image_id: Some(image_id.clone()),
+                };
+                return r;
+              }
+            }
+          }
+        };
+      }, Err(e) => {
+        eprintln!("Error: {}", e);
+      }
+    };
+
+    LocalImageSearchResult {
+      found: false,
+      image_url: image_url.clone(),
+      image_tag: search_target_tag.clone(),
+      image_digest: None,
+      image_id: None,
+    }
+  }
+  pub async fn download_image(image_url: String, tag: Option<String>) -> bool {
+    true
+  }
+
+}

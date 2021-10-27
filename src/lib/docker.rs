@@ -1,7 +1,11 @@
 pub mod container;
+pub mod image;
 
 use tokio;
 // use futures::{Future, StreamExt};
+
+#[allow(unused_imports)]
+use image::*;
 
 use super::global;
 use super::config::parser::ParsedConfig;
@@ -76,7 +80,10 @@ impl Docker {
   pub async fn test_connection(self) -> bool {
     let result = self.docker.ping().await.is_ok();
 
-    let _ = container::Container::new(String::from("test"), String::from("shellcodesniper/polycube_pan"), String::from("main"));
+    // let _ = container::Container::new(String::from("test"), String::from("shellcodesniper/polycube_pan"), String::from("main"));
+
+    // let r = self.get_local_image_digest(String::from("shellcodesniper/polycube_pan"), None).await;
+    // println!("{:?}", r);
 
     result
   }
