@@ -34,7 +34,8 @@ impl Registry {
   pub async fn login(&mut self) {
     let url = format!("{}/v2/users/login", self.registry_url);
 
-    debug!("{}", url);
+    debug!("LOGIN PROCESSSSSSS");
+    // debug!("{}", url);
 
     let username = (self.username.clone().to_owned()).unwrap_or(String::from("anonymous"));
     let password= (self.password.clone().to_owned()).unwrap_or(String::from("anonymous"));

@@ -26,31 +26,45 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   logger::log_init();
   info!("=== INITIALIZING DONE ===");
 
-  let _ = docker::Docker::new();
+  let main_docker = docker::Docker::new();
 
   let mut registry = registry::Registry::new();
   
   registry = registry_login(registry).await;
 
-  registry_get_digest_test(registry.clone()).await;
+  // NOTE 여기부터 도커, 레지스트리 준비가 완료된 시점임.
+  test_script(main_docker, registry).await;
 
   Ok(())
 }
-
 async fn registry_login(mut registry: registry::Registry) -> registry::Registry {
   let _ = (registry).login().await;
   registry
 }
 
 async fn registry_get_digest_test(registry: registry::Registry) {
-  let result = registry.clone().get_digest_of_image(String::from("shellcodesniper/multitool_api"), None).await;
+  let result = registry.clone().get_digest_of_image(String::from("nginx"), Some(String::from("stable-alpine"))).await;
+  debug!("REsult Get");
   if result.found {
-    debug!("FOUND : <{}:{}> {}", result.image_url, result.tag, result.digest.unwrap());
+    debug!("FOUND : <{}:{}> {:?}", result.image_url, result.tag, result.digest);
   } else {
     debug!("NOT FOUND: <{}:{}> {:?}", result.image_url, result.tag, result.digest);
   }
-  let result = registry.clone().get_digest_of_image(String::from("shellcodesniper/polycube_pan"), Some(String::from("latest"))).await;
+  let result = registry.clone().get_digest_of_image(String::from("nginx"), Some(String::from("stable-alpine"))).await;
   if result.found {
     debug!("FOUND : <{}:{}> {}", result.image_url, result.tag, result.digest.unwrap());
   }
+}
+
+async fn test_script(docker: docker::Docker, registry: registry::Registry) {
+  debug!("test script start");
+  registry_get_digest_test(registry.clone()).await;
+  debug!("First Script Done");
+  let r = docker.clone().get_local_image_digest(String::from("nginx"), None).await;
+  debug!("{:?}", r);
+
+  let image_downloaded = docker.clone().download_image(String::from("nginx"), Some(String::from("stable-alpine"))).await;
+  debug!("Image Download ? {}", image_downloaded);
+  let container = docker::container::Container::new(docker.clone(), String::from("nginx"), String::from("nginx"));
+  debug!("CONTAINER : {}", container.id);
 }

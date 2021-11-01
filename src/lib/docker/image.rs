@@ -1,5 +1,6 @@
-// use futures::StreamExt;
-// use shiplift::{PullOptions};
+use futures::StreamExt;
+use shiplift::{PullOptions};
+
 
 use super::Docker;
 
@@ -19,9 +20,14 @@ impl Docker {
     match self.docker.images().list(&Default::default()).await {
       Ok(results) => {
         for result in results {
+          debug!("It's Result!!");
+          debug!("{:?}", result);
           let image_id = result.id.clone();
           let mut repo_image_digest: String = String::new();
-          for repo_digest in result.repo_digests.unwrap() {
+          let repo_digest_result_list: Vec<String> = if let Some(rs) = result.repo_digests { rs } else { vec![] };
+          // NOTE it can be empty
+
+          for repo_digest in repo_digest_result_list {
             let repo_digest_split_collect: Vec<&str> = repo_digest.split('@').collect::<Vec<&str>>();
             if repo_digest_split_collect.len() < 2 {
               // NOTE maybe this is local image
@@ -33,8 +39,6 @@ impl Docker {
             repo_image_digest = repo_digest_split.next().unwrap().to_string();
           }
 
-          let repo_url_list: Vec<String> = Vec::new();
-          let repo_digest_list: Vec<String> = Vec::new();
           if result.repo_tags.is_some() {
             for repo_url in result.repo_tags.unwrap() {
               let mut repo_url_split = repo_url.split(':');
@@ -55,9 +59,10 @@ impl Docker {
           }
         };
       }, Err(e) => {
-        eprintln!("Error: {}", e);
+        error!("Error: {}", e);
       }
     };
+    debug!("Local Image Search Result");
 
     LocalImageSearchResult {
       found: false,
@@ -67,7 +72,28 @@ impl Docker {
       image_id: None,
     }
   }
-  pub async fn download_image(image_url: String, tag: Option<String>) -> bool {
+  pub async fn download_image(self, image_url: String, tag: Option<String>) -> bool {
+    debug!("Download!!");
+    let image_download_tag = if tag.is_some() { tag.unwrap() } else { String::from("latest") };
+    let image_download_url = format!("{}:{}", image_url, image_download_tag.clone()); 
+    debug!("Downloading image: {}", image_download_url);
+
+    let pull_opt = if self.auth.is_some() {
+      PullOptions::builder().image(image_download_url).tag(image_download_tag).auth(self.auth.clone().unwrap()).build()
+    } else {
+      PullOptions::builder().image(image_download_url).tag("latest").build()
+    };
+    let mut stream = self.docker
+        .images()
+        .pull(&pull_opt);
+      
+
+    while let Some(pull_result) = stream.next().await {
+        match pull_result {
+            Ok(output) => println!("\t{:?}", output),
+            Err(e) => error!("{}", e),
+        }
+    }
     true
   }
 

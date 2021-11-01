@@ -29,6 +29,8 @@ impl Registry {
     let https = HttpsConnector::new();
     let client = Client::builder()
       .build::<_, hyper::Body>(https);
+
+      
     
     let req = Request::builder()
       .method(Method::GET)
