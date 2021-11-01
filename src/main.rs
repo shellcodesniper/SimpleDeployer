@@ -67,4 +67,6 @@ async fn test_script(docker: docker::Docker, registry: registry::Registry) {
   debug!("Image Download ? {}", image_downloaded);
   let container = docker::container::Container::new(docker.clone(), String::from("nginx"), String::from("nginx"));
   debug!("CONTAINER : {}", container.id);
+  container.attach_logger().await;
+  // NOTE 한번 호출할때마다 stdout, stderr 데이터 받아옴
 }

@@ -1,8 +1,11 @@
 pub mod modify;
+pub mod logger;
 use super::Docker;
 
 #[allow(unused_imports)]
 use modify::*;
+#[allow(unused_imports)]
+use logger::*;
 
 #[derive(Clone)]
 pub enum ContainerRole {
@@ -99,5 +102,5 @@ impl Container {
     debug!("ID result : {}", changed_container.id.clone());
 
     changed_container
-  }
+  }  
 }

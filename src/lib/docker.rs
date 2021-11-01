@@ -78,7 +78,6 @@ impl Docker {
     x
   }
   pub async fn test_connection(self) -> bool {
-    let self_clone = self.clone();
     let result = self.docker.ping().await.is_ok();
     result
   }
