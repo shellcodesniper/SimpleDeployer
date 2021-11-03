@@ -1,6 +1,16 @@
-use shiplift::{ContainerOptions, LogsOptions};
+use futures::StreamExt;
+use shiplift::{tty::TtyChunk, ContainerOptions, ExecContainerOptions };
+use std::str::from_utf8;
 
 use super::Container;
+
+fn print_chunk(chunk: TtyChunk) {
+    match chunk {
+        TtyChunk::StdOut(bytes) => println!("Stdout: {}", from_utf8(&bytes).unwrap()),
+        TtyChunk::StdErr(bytes) => eprintln!("Stdout: {}", from_utf8(&bytes).unwrap()),
+        TtyChunk::StdIn(_) => unreachable!(),
+    }
+}
 
 impl Container {
   pub async fn check_container_exist(self, container_name: String) -> bool {
@@ -68,5 +78,22 @@ impl Container {
     } else {
       None 
     }
+  }
+
+  pub async fn execute_command(self, commands: Vec<&str>) {
+    let self_ptr = self.clone();
+    let container_id = self_ptr.clone().id.clone();
+    let exec_opts = ExecContainerOptions::builder()
+      .cmd(commands)
+      .attach_stdout(false)
+      .attach_stderr(false)
+      .build();
+    
+    while let Some(exec_result) = self_ptr.docker.docker.containers().get(&container_id).exec(&exec_opts).next().await {
+      match exec_result {
+        Ok(chunk) => print_chunk(chunk),
+        Err(e) => error!("Error On Execute Command\n{}", e),
+      }
+    };
   }
 }

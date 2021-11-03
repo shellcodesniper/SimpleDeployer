@@ -9,7 +9,7 @@ use image::*;
 
 use super::global;
 use super::config::parser::ParsedConfig;
-use shiplift::{Docker as ShipDocker, PullOptions, RegistryAuth};
+use shiplift::{Docker as ShipDocker, RegistryAuth};
 
 #[derive(Clone, Default)]
 pub struct Docker {
@@ -69,7 +69,7 @@ impl Docker {
       } else {
         error!("Connection result : {}", connect_result);
         error!("Please Check Repository Settings in config");
-      };
+      }
 
     });
     let _ = test_thread.join();
