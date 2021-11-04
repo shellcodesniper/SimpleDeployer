@@ -39,6 +39,7 @@ impl ParsedConfig {
     };
 
     let default  = ConfigDefault {
+      is_development: config.get("Default", "is_development").unwrap_or(String::from("no")) == "yes",
       container_prefix: config.get("Default", "container_prefix").unwrap_or(String::from("server")),
       burnup_waiting: config.getint("Default", "burnup_waiting").unwrap().unwrap_or(5),
       docker_socket: config.get("Default", "docker_socket").unwrap_or(String::from("/var/run/docker.sock")),

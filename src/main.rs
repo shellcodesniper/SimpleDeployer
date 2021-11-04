@@ -34,10 +34,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
   registry = registry_login(registry).await;
 
   // NOTE 여기부터 도커, 레지스트리 준비가 완료된 시점임.
-  // test_script(main_docker, registry).await;
+  // test_script(main_docker.clone(), registry.clone()).await;
   // TEST SCRIPT
 
   controller::entrypoint(main_docker, registry).await;
+
+  debug!("Program Exiting");
   Ok(())
 }
 async fn registry_login(mut registry: registry::Registry) -> registry::Registry {

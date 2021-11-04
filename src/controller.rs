@@ -1,4 +1,5 @@
 use super::lib::{ config, docker, registry, utils, logger, global};
+pub mod container;
 
 
 // let test_thread = std::thread::spawn(move || {
@@ -22,5 +23,8 @@ use super::lib::{ config, docker, registry, utils, logger, global};
 pub async fn entrypoint(main_docker: docker::Docker, registry: registry::Registry) {
   global::GLOBAL_DOCKER_LOCK.set(main_docker);
   global::GLOBAL_REGISTRY_LOCK.set(registry);
-  info!("Program EntryPoint");
+  info!("Enter Program EntryPoint");
+
+  container::controller_check_outdated().await;
+
 }

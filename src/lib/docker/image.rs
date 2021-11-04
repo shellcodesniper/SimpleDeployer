@@ -20,8 +20,8 @@ impl Docker {
     match self.docker.images().list(&Default::default()).await {
       Ok(results) => {
         for result in results {
-          debug!("It's Result!!");
-          debug!("{:?}", result);
+          // debug!("It's Result!!");
+          // debug!("{:?}", result);
           let image_id = result.id.clone();
           let mut repo_image_digest: String = String::new();
           let repo_digest_result_list: Vec<String> = if let Some(rs) = result.repo_digests { rs } else { vec![] };
