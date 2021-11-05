@@ -1,5 +1,5 @@
 FROM rust:alpine
-
+RUN apk add --no-cache gcc
 RUN echo "RUST VERSION --- $(rustc -V)"
 
 RUN mkdir /app
