@@ -6,7 +6,6 @@ RUN mkdir /app
 WORKDIR /app
 ADD . /app
 
-RUN cargo build --release --verbose --target-dir "/app/dist"
+RUN cargo build --release --verbose --target-dir "/app/dist" && mv /app/dist/release/simple-deployer /app/entrypoint && rm -rf /app/dist/
 
-
-ENTRYPOINT [ "/app/dist/release/simple-deployer" ]
+ENTRYPOINT [ "/app/entrypoint" ]
