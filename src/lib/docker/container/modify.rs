@@ -73,10 +73,13 @@ impl Container {
     let container_opts = if self_ptr.clone().role.name() == "nginx" {
       ContainerOptions::builder(&image_selected_url)
         .name(&server_name)
-        .volumes(vec!["/tmp/kuuwange/nginx:/etc/nginx"])
+        .env({"TARGET_CONTAINER": "server_master", "TARGET_CONTAINER_PORT": "3000", "LISTEN_PORT": "80"})
+        .volumes(vec!["/tmp/kuuwange/certs/:/etc/certs/"])
+        .volumes(vec!["/tmp/kuuwange/nginx/nginx.conf:/etc/nginx/nginx.conf"])
+        .volumes(vec!["/tmp/kuuwange/nginx/templates:/etc/nginx/templates"])
         .expose(80, "tcp", 80)
         .expose(443, "tcp", 443)
-        .auto_remove(true)
+        // .auto_remove(true)
         .build()
     } else {
       ContainerOptions::builder(&image_selected_url)
