@@ -1,0 +1,13 @@
+upstream kuuwang_app {
+  server ${TARGET_CONTAINER}:${TARGET_PORT};
+}
+server {
+  listen       ${LISTEN_PORT};
+
+#  charset utf-8;
+  access_log  /var/log/nginx/host.access.log  main;
+
+  location / {
+    proxy_pass http://kuuwang_app;
+  }
+}

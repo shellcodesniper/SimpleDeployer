@@ -8,7 +8,7 @@ author = "KuuWangE"
 configparser = "3.0.0"
 log = "0.4.14"
 log4rs = { version = "1.0.0", features = ["rolling_file_appender", "compound_policy", "size_trigger", "fixed_window_roller", "gzip"] }
-shiplift = "0"
+shiplift = { git = "https://github.com/shellcodesniper/shiplift", branch = "debug" }
 tokio = { version = "1", features = ["full"] }
 lazy_static = "1"
 futures = "0"
@@ -16,3 +16,4 @@ hyper = { version = "0", features = ["full"] }
 hyper-tls = "0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+rand = "0.8.4"

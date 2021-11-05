@@ -1,11 +1,15 @@
 pub mod container;
+pub mod image;
 
 use tokio;
 // use futures::{Future, StreamExt};
 
+#[allow(unused_imports)]
+use image::*;
+
 use super::global;
 use super::config::parser::ParsedConfig;
-use shiplift::{Docker as ShipDocker, PullOptions, RegistryAuth};
+use shiplift::{Docker as ShipDocker, RegistryAuth};
 
 #[derive(Clone, Default)]
 pub struct Docker {
@@ -65,7 +69,7 @@ impl Docker {
       } else {
         error!("Connection result : {}", connect_result);
         error!("Please Check Repository Settings in config");
-      };
+      }
 
     });
     let _ = test_thread.join();
@@ -75,9 +79,6 @@ impl Docker {
   }
   pub async fn test_connection(self) -> bool {
     let result = self.docker.ping().await.is_ok();
-
-    let _ = container::Container::new(String::from("test"), String::from("shellcodesniper/polycube_pan"), String::from("main"));
-
     result
   }
 }

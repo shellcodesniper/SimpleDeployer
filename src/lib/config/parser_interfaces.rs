@@ -1,5 +1,6 @@
 #[derive(Debug, Clone, Default)]
 pub struct ConfigDefault {
+  pub is_development: bool,
   pub container_prefix: String,
   pub burnup_waiting: i64,
   pub docker_socket: String,
