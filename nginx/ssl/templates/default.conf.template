@@ -1,0 +1,31 @@
+upstream kuuwang_app {
+  server ${TARGET_CONTAINER}:${TARGET_PORT};
+}
+server {
+  listen       ${LISTEN_PORT};
+
+#  charset utf-8;
+  access_log  /var/log/nginx/host.access.log  main;
+
+  location / {
+    proxy_pass http://kuuwang_app;
+  }
+}
+
+server {
+  listen 443 ssl;
+//server_name boilerplate.kuuwang.com;
+  keepalive_timeout   70;
+
+  ssl_certificate /etc/ssl/fullchain.pem;
+  ssl_certificate_key /etc/ssl/privkey.pem;
+
+  location / {
+    proxy_pass http://kuuwang_app;
+
+
+    proxy_set_header Host $host;
+    proxy_set_header Connection "Keep-Alive";
+    proxy_set_header Proxy-Connection "Keep-Alive";
+  }
+}

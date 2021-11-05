@@ -1,6 +1,7 @@
 use futures::StreamExt;
-use shiplift::{tty::TtyChunk, ContainerOptions, ExecContainerOptions };
+use shiplift::{ContainerListOptions, ContainerOptions, ExecContainerOptions, tty::TtyChunk};
 use std::str::from_utf8;
+use rand::Rng;
 
 use super::Container;
 
@@ -14,15 +15,15 @@ fn print_chunk(chunk: TtyChunk) {
 
 impl Container {
   pub async fn check_container_exist(self, container_name: String, delete: bool) -> bool {
-    let container_list  = self.docker.docker.containers().list(&Default::default()).await;
+    let container_list  = self.docker.docker.containers().list(&ContainerListOptions::builder().all().build()).await;
     let mut found: bool = false;
     if let Ok(containers) = container_list {
       for container in containers {
         debug!("container name {:?}", container.names);
         if container.names.concat().contains(&container_name) {
           if delete {
-            let _ = self.docker.docker.containers().get(container.clone().id).kill(None).await;
-            let _ = self.docker.docker.containers().get(container.clone().id).delete().await;
+            let _ = self.docker.docker.containers().get(container_name.clone()).kill(None).await;
+            let _ = self.docker.docker.containers().get(container_name.clone()).delete().await;
             // ? Kill & Delete Existing Container
           }
           found = true;
@@ -34,7 +35,7 @@ impl Container {
   }
 
   pub async fn get_container_id(self, container_name: String) -> Option<String> {
-    let container_list  = self.docker.docker.containers().list(&Default::default()).await;
+    let container_list  = self.docker.docker.containers().list(&ContainerListOptions::builder().all().build()).await;
     let mut found: Option<String> = None;
     if let Ok(containers) = container_list {
       for container in containers {
@@ -49,6 +50,7 @@ impl Container {
   }
 
   pub async fn create_container(self) -> Option<String> {
+    let mut rng = rand::thread_rng();
     let self_ptr = self.clone();
     let server_name = self_ptr.clone().role.clone().name();
     let _ = self_ptr.clone().check_container_exist(server_name.clone().to_string(), true).await;
@@ -60,19 +62,30 @@ impl Container {
     let id = self.get_container_id(server_name.clone()).await;
     debug!("get container id result : {:?}", id);
     if let Some(id) = id {
-      if let Err(e) = self_ptr.clone().docker.docker.containers().get(id.clone()).kill(None).await {
+      if let Err(e) = self_ptr.clone().docker.docker.containers().get(server_name.clone()).kill(None).await {
         error!("{:?}", e);
       }
-      if let Err(e) = self_ptr.clone().docker.docker.containers().get(id.clone()).delete().await {
+      if let Err(e) = self_ptr.clone().docker.docker.containers().get(server_name.clone()).delete().await {
         error!("{:?}", e);
       }
     }
 
-    let container_opts = ContainerOptions::builder(&image_selected_url)
-      .name(&server_name)
-      .expose(3000, "tcp", 3000)
-      .auto_remove(true)
-      .build();
+    let container_opts = if self_ptr.clone().role.name() == "nginx" {
+      ContainerOptions::builder(&image_selected_url)
+        .name(&server_name)
+        .volumes(vec!["/tmp/kuuwange/nginx:/etc/nginx"])
+        .expose(80, "tcp", 80)
+        .expose(443, "tcp", 443)
+        .auto_remove(true)
+        .build()
+    } else {
+      ContainerOptions::builder(&image_selected_url)
+        .name(&server_name)
+        .volumes(vec!["/tmp/kuuwange/server:/shared_dir"])
+        .expose(3000, "tcp", rng.gen_range(16300..17000))
+        .auto_remove(true)
+        .build()
+    };
       
     let create_result = self_ptr.clone().docker.docker.containers()
       .create(&container_opts)
@@ -93,6 +106,18 @@ impl Container {
         return None ;
       }
     }
+  }
+
+  pub async fn run(self) {
+    let self_ptr = self.clone();
+    let start_result = self_ptr.clone().docker.docker
+        .containers()
+        .get(self_ptr.id.clone())
+        .start()
+        .await;
+      if let Err(e) = start_result {
+        println!("{}", e);
+      }
   }
 
   pub async fn execute_command(self, commands: Vec<&str>) {

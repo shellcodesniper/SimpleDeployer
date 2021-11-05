@@ -1,7 +1,7 @@
 use crate::lib::global;
 use crate::lib::docker::container::Container;
 
-pub async fn controller_check_outdated() {
+pub async fn controller_check_outdated_and_pull_for_start() {
   let config= global::GLOBAL_PARSED_CONFIG_LOCK.get().clone();
   let docker = global::GLOBAL_DOCKER_LOCK.get();
   let registry = global::GLOBAL_REGISTRY_LOCK.get();
@@ -101,10 +101,6 @@ pub async fn controller_download_stage(image_base_url: String, image_tag: String
 
 pub async fn controller_create_stage(image_base_url: String, is_development: bool) {
   let docker = global::GLOBAL_DOCKER_LOCK.get();
-  let config= global::GLOBAL_PARSED_CONFIG_LOCK.get().clone();
-
-  let burn_up_time = config.default.burnup_waiting.unsigned_abs();
-  let docker_ptr = docker.clone();
   
   let main_role = if is_development { String::from("dev") } else { String::from("main") };
 
@@ -114,14 +110,26 @@ pub async fn controller_create_stage(image_base_url: String, is_development: boo
   // ? Create Container Object
 
   global::GLOBAL_CONTAINER_MAIN_LOCK.set(Some(container_main));
+  global::GLOBAL_CONTAINER_ROLLBACK_LOCK.set(Some(container_rollback));
+  global::GLOBAL_CONTAINER_NGINX_LOCK.set(Some(container_nginx));
 
 }
 // NOTE create container & Register Global Variable
 
 pub async fn controller_start_stage() {
+  let config= global::GLOBAL_PARSED_CONFIG_LOCK.get().clone();
 
+  let burn_up_time = config.default.burnup_waiting.unsigned_abs();
+
+  global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
+  std::thread::sleep(std::time::Duration::from_secs(burn_up_time));
+
+  global::GLOBAL_CONTAINER_NGINX_LOCK.get().clone().unwrap().run().await;
+  std::thread::sleep(std::time::Duration::from_secs(burn_up_time));
 }
 
 pub async fn controller_nginx_reload_stage() {
-
+  let nginx = global::GLOBAL_CONTAINER_NGINX_LOCK.get().clone().unwrap();
+  let command_vector: Vec<&str> = vec!["nginx", "-s", "reload"];
+  nginx.execute_command(command_vector).await;
 }
