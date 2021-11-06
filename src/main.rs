@@ -9,39 +9,7 @@ fn print_usage(args: Vec<String>) {
   println!("Usage: {} [config-file-path]", args[0]);
   println!("\tSample: {} ./bin/sampleConfig.cfg", args[0]);
 }
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-  let args: Vec<String> = std::env::args().collect();
-  if args.len() < 2 {
-    print_usage(args);
-    exit(-1);
-  }
-  let config_file_path = String::from(&args[1]);
-  let file_exist = utils::io::check_str_file_exist(config_file_path.clone());
-  if !file_exist {
-    println!("\n\n\nFILE NOT EXIST!!!\n\n");
-    print_usage(args);
-  exit(-2);
-  }
-  config::parser::ParsedConfig::new(config_file_path.clone());
-  logger::log_init();
-  info!("=== INITIALIZING DONE ===");
 
-  let main_docker = docker::Docker::new();
-
-  let mut registry = registry::Registry::new();
-  
-  registry = registry_login(registry).await;
-
-  // NOTE 여기부터 도커, 레지스트리 준비가 완료된 시점임.
-  // test_script(main_docker.clone(), registry.clone()).await;
-  // TEST SCRIPT
-
-  controller::entrypoint(main_docker, registry).await;
-
-  debug!("Program Exiting");
-  Ok(())
-}
 async fn registry_login(mut registry: registry::Registry) -> registry::Registry {
   let _ = (registry).login().await;
   registry
@@ -87,4 +55,38 @@ async fn test_script(docker: docker::Docker, registry: registry::Registry) {
   debug!("EXEC COMMAND");
   let command = vec!["nginx", "-s", "reload"];
   container.execute_command(command).await;
+}
+
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+  let args: Vec<String> = std::env::args().collect();
+  if args.len() < 2 {
+    print_usage(args);
+    exit(-1);
+  }
+  let config_file_path = String::from(&args[1]);
+  let file_exist = utils::io::check_str_file_exist(config_file_path.clone());
+  if !file_exist {
+    println!("\n\n\nFILE NOT EXIST!!!\n\n");
+    print_usage(args);
+  exit(-2);
+  }
+  config::parser::ParsedConfig::new(config_file_path.clone());
+  logger::log_init();
+  info!("=== INITIALIZING DONE ===");
+
+  let main_docker = docker::Docker::new();
+
+  let mut registry = registry::Registry::new();
+  
+  registry = registry_login(registry).await;
+
+  // NOTE 여기부터 도커, 레지스트리 준비가 완료된 시점임.
+  // test_script(main_docker.clone(), registry.clone()).await;
+  // TEST SCRIPT
+
+  controller::entrypoint(main_docker, registry).await;
+
+  debug!("Program Exiting");
+  Ok(())
 }
