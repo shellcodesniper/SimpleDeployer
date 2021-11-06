@@ -129,7 +129,5 @@ pub async fn controller_start_stage() {
 }
 
 pub async fn controller_nginx_reload_stage() {
-  let nginx = global::GLOBAL_CONTAINER_NGINX_LOCK.get().clone().unwrap();
-  let command_vector: Vec<&str> = vec!["nginx", "-s", "reload"];
-  nginx.execute_command(command_vector).await;
+  global::GLOBAL_CONTAINER_NGINX_LOCK.regenerate().await;
 }
