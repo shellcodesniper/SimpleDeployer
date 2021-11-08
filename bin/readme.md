@@ -7,6 +7,6 @@ place fullchain, privkey to certs folder & mv nginx_template/ssl to nginx folder
 if you don't want to use ssl
 just mv nginx_template/nossl to nginx folder
 
-./start.sh 
+./start_nossl.sh or ./start_ssl.sh to deploy!
 
 Done!

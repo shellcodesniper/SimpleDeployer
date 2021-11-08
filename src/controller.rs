@@ -6,24 +6,7 @@ use cron_parser::parse;
 pub mod container;
 
 
-fn prepare_nginx_config() {
-  use fs_extra::dir::{ copy, CopyOptions };
-  let config = global::GLOBAL_PARSED_CONFIG_LOCK.get().clone();
-
-  let use_ssl = config.nginx.ssl;
-
-  let mut options = CopyOptions::new();
-  options.overwrite = true;
-  options.copy_inside = true;
-  if use_ssl {
-    let _ = copy("/tmp/kuuwange/certs/", "/app/certs/", &options);
-  }
-}
-
 pub async fn control_loop() {
-  let container_main = global::GLOBAL_CONTAINER_MAIN_LOCK.get();
-  let container_rollback= global::GLOBAL_CONTAINER_MAIN_LOCK.get();
-
   let config = global::GLOBAL_PARSED_CONFIG_LOCK.get().clone();
   let update_interval = config.default.update_check_interval;
   let update_use_cron = config.default.update_check_use_cron;
@@ -67,7 +50,7 @@ fn check_next_update_time(last_update_check_time: DateTime<Tz>, update_use_cron:
 }
 
 async fn health_check_time(last_health_check_time: DateTime<Tz>, health_check_interval: i64) -> bool {
- let mut next: DateTime<Tz> = last_health_check_time + Duration::seconds(health_check_interval);
+ let next: DateTime<Tz> = last_health_check_time + Duration::seconds(health_check_interval);
  if next < Utc::now().with_timezone(&Seoul) {
    return true;
  }
@@ -75,8 +58,6 @@ async fn health_check_time(last_health_check_time: DateTime<Tz>, health_check_in
 }
 
 async fn health_check_and_report() {
-  let docker = global::GLOBAL_DOCKER_LOCK.get().clone();
-
   let container_main = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap();
   let container_rollback = global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap();
 
@@ -145,7 +126,6 @@ async fn check_update_and_update_container() {
 }
 
 pub async fn entrypoint(main_docker: docker::Docker, registry: registry::Registry) {
-  prepare_nginx_config();
   global::GLOBAL_DOCKER_LOCK.set(main_docker);
   global::GLOBAL_REGISTRY_LOCK.set(registry);
   info!("Enter Program EntryPoint");

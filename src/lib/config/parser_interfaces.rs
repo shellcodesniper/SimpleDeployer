@@ -18,9 +18,9 @@ pub struct Nginx {
   pub nginx: bool,
   pub http_redirect: bool,
 
-  pub ssl: bool,
-  pub ssl_fullchain: Option<String>,
-  pub ssl_privkey: Option<String>,
+  // pub ssl: bool,
+  // pub ssl_fullchain: Option<String>,
+  // pub ssl_privkey: Option<String>,
 }
 
 #[derive(Debug, Clone, Default)]
