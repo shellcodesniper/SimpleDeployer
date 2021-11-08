@@ -1,8 +1,8 @@
-name: AUTO DEPLOYMENT
+name: AUTO Develop Version DEPLOYMENT
 
 on:
   push:
-    branches: [ main ]
+    branches: [ develop ]
 
 jobs:
   build_and_deploy:
@@ -34,19 +34,5 @@ jobs:
           push: true
           file: ./Dockerfile
           tags: |
-            shellcodesniper/simpledeploy:stable
-            shellcodesniper/simpledeploy:v${{ steps.extract_version.outputs.version }}
-      - 
-        name: MAKE RELEASE DATE
-        id: date
-        run: echo "release_time=$(TZ=Asia/Seoul date +'%Y-%m-%d %H:%M')" >> $GITHUB_ENV
-      - 
-        name: CREATE RELEASE
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ steps.extract_version.outputs.version }}
-          release_name: Release v${{ steps.extract_version.outputs.version }} [${{ env.release_time }}]
-          body: AUTO RELEASE MADE FROM workflows
-          draft: true
+            shellcodesniper/simpledeploy:latest
+            shellcodesniper/simpledeploy:dev-v${{ steps.extract_version.outputs.version }}
