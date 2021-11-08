@@ -1,4 +1,7 @@
 #[macro_use] extern crate log;
+extern crate chrono;
+extern crate chrono_tz;
+
 mod lib;
 mod controller;
 use std::process::exit;

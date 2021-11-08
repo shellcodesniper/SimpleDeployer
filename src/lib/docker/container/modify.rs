@@ -65,7 +65,7 @@ impl Container {
 
     let id = self.get_container_id(server_name.clone()).await;
     debug!("get container id result : {:?}", id);
-    if let Some(id) = id {
+    if let Some(_) = id {
       if let Err(e) = self_ptr.clone().docker.docker.containers().get(server_name.clone()).kill(None).await {
         error!("{:?}", e);
       }
@@ -93,7 +93,7 @@ impl Container {
         .network_mode("overlay")
         .volumes(vec!["/tmp/kuuwange/:/tmp/kuuwange/"])
         .expose(3000, "tcp", rng.gen_range(16300..17000))
-        .auto_remove(true)
+        // .auto_remove(true)
         .build()
     };
       
@@ -146,6 +146,11 @@ impl Container {
     };
   }
 
+  pub async fn stop_self(self) {
+    let _ = self.docker.docker.containers().get(self.name.clone()).kill(None).await;
+    let _ = self.docker.docker.containers().get(self.name.clone()).delete().await;
+  }
+
   pub async fn update_check(self) -> bool {
     let registry_ptr= global::GLOBAL_REGISTRY_LOCK.get().clone();
     let self_ptr = self.clone();
@@ -163,6 +168,14 @@ impl Container {
       }
     }
     false
+  }
+
+  pub async fn perform_update(self) -> bool {
+    let self_ptr = self.clone();
+    let docker = self_ptr.docker;
+
+    docker.download_image(self_ptr.image.clone(), Some(self.role.tag().clone())).await;
+    true
   }
   
   pub async fn is_healthy(self) -> bool {

@@ -35,16 +35,18 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
     if let Some(nginx) = nginx_container {
       if let Some(target) = container_target {
         let command_arg = format!("TARGET_CONTAINER={}", target).clone().to_owned();
-        let command = vec!["export", &command_arg];
+        let command_export = &format!("export {}", command_arg);
+        let command = vec!["/bin/sh", "-c", command_export];
         nginx.clone().execute_command(command).await;
       }
 
       if let Some(target) = container_target_port {
         let command_arg = format!("TARGET_PORT={}", target).clone().to_owned();
-        let command = vec!["export", &command_arg];
+        let command_export = &format!("export {}", command_arg);
+        let command = vec!["/bin/sh", "-c", command_export];
         nginx.execute_command(command).await;
       }
-
     }
+    self.regenerate().await;
   }
 }
