@@ -46,8 +46,8 @@ impl Default for ContainerRole {
 pub struct Container {
   docker: Docker, 
   pub id: String,
-  name: String,
-  image: String,
+  pub name: String,
+  pub image: String,
   digest: String,
   role: ContainerRole,
   network_connected: bool,

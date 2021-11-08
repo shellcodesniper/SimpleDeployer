@@ -112,7 +112,6 @@ pub async fn controller_create_stage(image_base_url: String, is_development: boo
   global::GLOBAL_CONTAINER_MAIN_LOCK.set(Some(container_main));
   global::GLOBAL_CONTAINER_ROLLBACK_LOCK.set(Some(container_rollback));
   global::GLOBAL_CONTAINER_NGINX_LOCK.set(Some(container_nginx));
-
 }
 // NOTE create container & Register Global Variable
 

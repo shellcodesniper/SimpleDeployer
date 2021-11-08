@@ -20,6 +20,9 @@ serde_json = "1"
 rand = "0.8.4"
 fs_extra = "1"
 openssl-sys = "*"
+chrono = "0"
+chrono-tz = { version = "0", features = ["serde"] }
+cron-parser = "0"
 
 [features]
 vendored = ["openssl-sys/vendored"]
