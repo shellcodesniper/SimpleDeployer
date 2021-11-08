@@ -3,9 +3,9 @@ docker network create --opt encrypted --driver overlay --attachable overlay
 
 rm -rf /tmp/kuuwange/
 mkdir -p /tmp/kuuwange/nginx/
-cp -rf ./bin/nginx_template/nossl/ /tmp/kuuwange/nginx/
-cp ./secret.cfg /tmp/kuuwange/config.cfg
-cp ./bin/regenerate.sh /tmp/kuuwange/nginx/
+cp -rf ./nginx_template/nossl/ /tmp/kuuwange/nginx/
+cp ./config.cfg /tmp/kuuwange/config.cfg
+cp ./regenerate.sh /tmp/kuuwange/nginx/
 
 docker run -d --rm --name deployer \
   --network=overlay \

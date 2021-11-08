@@ -5,10 +5,10 @@ rm -rf /tmp/kuuwange/
 mkdir -p /tmp/kuuwange/nginx/
 mkdir -p /tmp/kuuwange/certs/
 
-cp -rf ./bin/certs/ /tmp/kuuwange/certs/
-cp -rf ./bin/nginx_template/ssl/ /tmp/kuuwange/nginx/
-cp ./secret.cfg /tmp/kuuwange/config.cfg
-cp ./bin/regenerate.sh /tmp/kuuwange/nginx/
+cp -rf ./certs/ /tmp/kuuwange/certs/
+cp -rf ./nginx_template/ssl/ /tmp/kuuwange/nginx/
+cp ./config.cfg /tmp/kuuwange/config.cfg
+cp ./regenerate.sh /tmp/kuuwange/nginx/
 
 docker run -d --rm --name deployer \
   --network=overlay \
