@@ -14,5 +14,5 @@ docker run -d --rm --name deployer \
   --network=overlay \
   -v /tmp/kuuwange/:/tmp/kuuwange \
   -v /var/run/docker.sock:/var/run/docker.sock \
-    shellcodesniper/simpledeploy:latest \
+    shellcodesniper/simpledeploy:stable \
       /tmp/kuuwange/config.cfg
