@@ -46,7 +46,7 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
         let command = vec!["/bin/sh", "-c", command_export];
         nginx.execute_command(command).await;
       }
-
     }
+    self.regenerate().await;
   }
 }
