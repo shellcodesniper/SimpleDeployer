@@ -2,23 +2,25 @@ upstream kuuwang_app {
   server ${TARGET_CONTAINER}:${TARGET_PORT};
 }
 server {
-  listen       ${LISTEN_PORT};
+  listen       80;
 
 #  charset utf-8;
   access_log  /var/log/nginx/host.access.log  main;
 
   location / {
     proxy_pass http://kuuwang_app;
+    # return 301 https://$host$request_uri;
+    # remove # if you want to redirect https
   }
 }
 
 server {
   listen 443 ssl;
-//server_name boilerplate.kuuwang.com;
+# server_name boilerplate.kuuwang.com;
   keepalive_timeout   70;
 
-  ssl_certificate /etc/ssl/fullchain.pem;
-  ssl_certificate_key /etc/ssl/privkey.pem;
+  ssl_certificate /etc/certs/fullchain.pem;
+  ssl_certificate_key /etc/certs/privkey.pem;
 
   location / {
     proxy_pass http://kuuwang_app;

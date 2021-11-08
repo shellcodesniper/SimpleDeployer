@@ -53,9 +53,9 @@ impl ParsedConfig {
     let nginx = Nginx {
       nginx: (config.get("Nginx", "nginx").unwrap_or(String::from("no")) == "yes"),
       http_redirect: (config.get("Nginx", "http_redirect").unwrap_or(String::from("no")) == "yes"),
-      ssl: (config.get("Nginx", "ssl").unwrap_or(String::from("no")) == "yes"),
-      ssl_fullchain: config.get("Nginx", "ssl_fullchain"),
-      ssl_privkey: config.get("Nginx", "ssl_privkey"),
+      // ssl: (config.get("Nginx", "ssl").unwrap_or(String::from("no")) == "yes"),
+      // ssl_fullchain: config.get("Nginx", "ssl_fullchain"),
+      // ssl_privkey: config.get("Nginx", "ssl_privkey"),
     };
 
     let repository = Repository {
