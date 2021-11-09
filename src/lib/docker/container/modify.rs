@@ -121,11 +121,11 @@ impl Container {
     let self_ptr = self.clone();
     let container_inspect = self_ptr.clone().docker.docker
       .containers()
-      .get(self_ptr.id.clone())
+      .get(self_ptr.name.clone())
       .inspect().await;
+    // debug!("{:?}", container_inspect);
     let ip_result = if let Ok(info) = container_inspect {
-      let ip = info.network_settings.ip_address.clone();
-      Some(ip)
+      Some(info.network_settings.networks.get("overlay").unwrap().ip_address.clone())
     } else {
       error!("{:?}", container_inspect);
       None
@@ -142,8 +142,8 @@ impl Container {
         .await;
     match start_result {
       Ok(_) => {
-        debug!("Started Container Id : {}", self_ptr.id);
-        let ip = self_ptr.get_ip().await;
+        let ip = self_ptr.clone().get_ip().await;
+        debug!("Started Container Id : {} Ip: {:?}", self_ptr.id, ip);
         if self.clone().role.name() == ContainerRole::Main.name() {
           global::GLOBAL_SYSTEM_STATUS_LOCK.set_main_ip(ip);
         } else if self.clone().role.name() == ContainerRole::Rollback.name() {
