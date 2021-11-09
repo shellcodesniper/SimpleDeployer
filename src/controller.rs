@@ -1,9 +1,10 @@
-use super::lib::{ config, docker, registry, utils, logger, global};
+use super::lib::{ docker, registry, global};
 use chrono::{DateTime, Duration, Utc };
 #[allow(unused_imports)]
 use chrono_tz::{ Tz, Asia::Seoul };
 use cron_parser::parse;
 pub mod container;
+use super::lib::global::status_interfaces::HealthyStatus;
 
 
 pub async fn control_loop() {
@@ -61,22 +62,61 @@ async fn health_check_and_report() {
   let container_main = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap();
   let container_rollback = global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap();
 
+
   let main_healthy = container_main.is_healthy().await;
+  global::GLOBAL_SYSTEM_STATUS_LOCK.set_main(if main_healthy { HealthyStatus::Healthy } else { HealthyStatus::Unhealthy });
   let rollback_healthy = container_rollback.is_healthy().await;
+  global::GLOBAL_SYSTEM_STATUS_LOCK.set_rollback(if rollback_healthy { HealthyStatus::Healthy } else { HealthyStatus::Unhealthy });
 
-  if main_healthy && rollback_healthy {
-    debug!("Main and Rollback are healthy");
-    let main_name = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap().name;
-    global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(Some(main_name), None).await;
-    global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().stop_self().await;
-  } else if main_healthy {
-    debug!("Main is Healthy");
-  } else if rollback_healthy {
-    debug!("Rollback is Healthy");
-  }else {
-    error!("Main and Rollback is not Healthy");
+  if global::GLOBAL_SYSTEM_STATUS_LOCK.is_updating() {
+    debug!("In Update Now, Be Patience");
+  } else {
+    if main_healthy && rollback_healthy {
+      debug!("Main and Rollback is healthy");
+      let main_container_role = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap().role;
+      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+      if main_container_role.clone().name() == current_nginx_role.name() {
+        debug!("Already Nginx Pointed to Main");
+      } else {
+        info!("Change Nginx Target To Main");
+        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
+        global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
+      }
+      debug!("Kill Rolback");
+      global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().stop_self().await;
+    } else if main_healthy {
+      debug!("Main is Healthy & Rollback is UnHealthy -> Keep Going!");
+
+      let main_container_role = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap().role;
+      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+
+      if main_container_role.clone().name() == current_nginx_role.name() {
+        debug!("Already Nginx Pointed to Main");
+      } else {
+        info!("Change Nginx Target To Main & Kill Rolback");
+        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
+        global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
+      }
+    } else if rollback_healthy {
+      warn!("Rollback is Healthy & Main is UnHealthy");
+
+      let rollback_container_role = global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().role;
+      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+
+      if rollback_container_role.clone().name() == current_nginx_role.name() {
+        debug!("Already Nginx Pointed to Rollback");
+      } else {
+        info!("Change Nginx Target To Main & Kill Rolback");
+        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(rollback_container_role);
+        global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip(), None).await;
+      }
+    }else {
+      error!("Main and Rollback is not Healthy");
+      global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
+      global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
+      error!("Just Tried to Wake up Main & Rollback Service, Hope to God");
+    }
   }
-
 }
 
 async fn check_update_and_update_container() {
@@ -91,13 +131,14 @@ async fn check_update_and_update_container() {
   let container_main = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap();
   let container_rollback= global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap();
 
+  global::GLOBAL_SYSTEM_STATUS_LOCK.set_update_start();
   if container_main.clone().update_check().await {
     info!("Main Container Will Update!");
     global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
     std::thread::sleep(std::time::Duration::from_secs(burn_up_time));
 
     container_rollback.clone().run().await;
-    global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(Some(container_rollback.name.clone()), None).await;
+    global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip(), None).await;
     container_main.stop_self().await;
 
     global::GLOBAL_CONTAINER_MAIN_LOCK.set(None);
@@ -114,14 +155,14 @@ async fn check_update_and_update_container() {
   }
   if container_rollback.clone().update_check().await {
     info!("Rollback Container Will Update!");
-    let container_main = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap();
-    global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(Some(container_main.clone().name.clone()), None).await;
+    global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
     container_rollback.stop_self().await;
 
     container::controller_download_stage(image_base_url.clone(), String::from("rollback")).await;
     let container_rollback = docker::container::Container::new(docker.clone().to_owned(), image_base_url.clone(), String::from("rollback"));
     global::GLOBAL_CONTAINER_ROLLBACK_LOCK.set(Some(container_rollback));
   }
+  global::GLOBAL_SYSTEM_STATUS_LOCK.set_update_finish();
 
 }
 

@@ -16,7 +16,7 @@ use lazy_static::lazy_static;
 use std::sync::{Arc, RwLock, RwLockReadGuard, RwLockWriteGuard};
 use std::ops::Deref;
 
-use status_interfaces::{ SystemStatus, ContainerStatus };
+use status_interfaces::{ SystemStatus };
 use container_logger_interfaces:: { ContainerLog };
 
 use super::config::parser::ParsedConfig;

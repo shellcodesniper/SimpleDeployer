@@ -5,8 +5,8 @@ rm -rf /tmp/kuuwange/
 mkdir -p /tmp/kuuwange/nginx/
 mkdir -p /tmp/kuuwange/certs/
 
-cp -rf ./certs/ /tmp/kuuwange/certs/
-cp -rf ./nginx_template/ssl/ /tmp/kuuwange/nginx/
+cp -rf ./certs/* /tmp/kuuwange/certs/
+cp -rf ./nginx_template/ssl/* /tmp/kuuwange/nginx/
 cp ./config.cfg /tmp/kuuwange/config.cfg
 cp ./regenerate.sh /tmp/kuuwange/nginx/
 
