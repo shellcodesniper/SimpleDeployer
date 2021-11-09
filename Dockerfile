@@ -16,7 +16,7 @@ RUN rm src/*.rs
 
 COPY ./src /app/src
 
-RUN rm /app/dist/release/deps/simple_deployer*
+RUN rm /app/dist/x86_64-unknown-linux-musl/release/deps/simple_deployer*
 RUN cargo build --release --target x86_64-unknown-linux-musl --verbose --target-dir "/app/dist" --features vendored && mv /app/dist/x86_64-unknown-linux-musl/release/simple-deployer /app/entrypoint && rm -rf /app/dist/
 
 # our final base
