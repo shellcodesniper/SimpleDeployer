@@ -32,18 +32,21 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
 
   pub async fn change_target(&self, container_target: Option<String>, container_target_port: Option<String>) {
     let nginx_container= self.get();
+    println!("NGINX ? : {}", nginx_container.is_some());
     if let Some(nginx) = nginx_container {
+      debug!("NGINX!!");
       if let Some(target) = container_target {
         let command_arg = format!("TARGET_CONTAINER={}", target).clone().to_owned();
-        let command_export = &format!("export {}", command_arg);
-        let command = vec!["/bin/sh", "-c", command_export];
+        let command_export = format!("export {}; /etc/nginx/regenerate.sh", command_arg);
+        let command = vec!["/bin/sh", "-c", command_export.as_str()];
+        debug!("{:?}", command);
         nginx.clone().execute_command(command).await;
       }
 
       if let Some(target) = container_target_port {
         let command_arg = format!("TARGET_PORT={}", target).clone().to_owned();
-        let command_export = &format!("export {}", command_arg);
-        let command = vec!["/bin/sh", "-c", command_export];
+        let command_export = format!("export {}; /etc/nginx/regenerate.sh", command_arg);
+        let command = vec!["/bin/sh", "-c", command_export.as_str()];
         nginx.execute_command(command).await;
       }
     }

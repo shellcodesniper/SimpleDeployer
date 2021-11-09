@@ -1,3 +1,5 @@
+use crate::lib::docker::container::ContainerRole;
+
 
  #[derive(Clone, Copy, Debug)]
 pub enum HealthyStatus {
@@ -5,25 +7,31 @@ pub enum HealthyStatus {
   Starting,
   Healthy,
   Unhealthy,
+  Updating,
 }
 
 #[derive(Clone, Debug)]
 pub struct SystemStatus {
-  pub healthy: HealthyStatus,
-  pub container_list: Vec<ContainerStatus>,
+  pub in_update: bool,
+  pub main: HealthyStatus,
+  pub main_ip: Option<String>,
+  pub rollback: HealthyStatus,
+  pub rollback_ip: Option<String>,
+  pub nginx: HealthyStatus,
+  pub nginx_target_role: ContainerRole,
 }
 
 impl SystemStatus {
   pub fn new() -> SystemStatus {
     SystemStatus {
-      healthy: HealthyStatus::Ready,
-      container_list: vec![],
+      in_update: false,
+      main: HealthyStatus::Ready,
+      main_ip: None,
+      rollback: HealthyStatus::Ready,
+      rollback_ip: None,
+      nginx: HealthyStatus::Ready,
+      nginx_target_role: ContainerRole::Main,
     }
   }
-}
 
-#[derive(Clone, Debug)]
-pub struct ContainerStatus {
-  pub healthy: HealthyStatus,
-  container_id: String,
 }

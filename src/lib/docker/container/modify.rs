@@ -1,10 +1,11 @@
 use futures::StreamExt;
 use shiplift::{ContainerListOptions, ContainerOptions, ExecContainerOptions, tty::TtyChunk};
-use std::{collections::HashMap, str::from_utf8};
+use std::{ str::from_utf8 };
 use rand::Rng;
 use hyper::Client;
 use hyper::{Body, Method, Request};
 
+use crate::lib::docker::container::ContainerRole;
 use crate::lib::global;
 
 use super::Container;
@@ -115,6 +116,22 @@ impl Container {
       }
     }
   }
+  
+  pub async fn get_ip(self) -> Option<String> {
+    let self_ptr = self.clone();
+    let container_inspect = self_ptr.clone().docker.docker
+      .containers()
+      .get(self_ptr.id.clone())
+      .inspect().await;
+    let ip_result = if let Ok(info) = container_inspect {
+      let ip = info.network_settings.ip_address.clone();
+      Some(ip)
+    } else {
+      error!("{:?}", container_inspect);
+      None
+    };
+    ip_result
+  }
 
   pub async fn run(self) {
     let self_ptr = self.clone();
@@ -123,9 +140,20 @@ impl Container {
         .get(self_ptr.id.clone())
         .start()
         .await;
-      if let Err(e) = start_result {
-        println!("{}", e);
+    match start_result {
+      Ok(_) => {
+        debug!("Started Container Id : {}", self_ptr.id);
+        let ip = self_ptr.get_ip().await;
+        if self.clone().role.name() == ContainerRole::Main.name() {
+          global::GLOBAL_SYSTEM_STATUS_LOCK.set_main_ip(ip);
+        } else if self.clone().role.name() == ContainerRole::Rollback.name() {
+          global::GLOBAL_SYSTEM_STATUS_LOCK.set_rollback_ip(ip);
+        }
+      },
+      Err(e) => {
+        error!("{:?}", e);
       }
+    }
   }
 
   pub async fn execute_command(self, commands: Vec<&str>) {
@@ -169,13 +197,13 @@ impl Container {
     false
   }
 
-  pub async fn perform_update(self) -> bool {
-    let self_ptr = self.clone();
-    let docker = self_ptr.docker;
+  // pub async fn perform_update(self) -> bool {
+  //   let self_ptr = self.clone();
+  //   let docker = self_ptr.docker;
 
-    docker.download_image(self_ptr.image.clone(), Some(self.role.tag().clone())).await;
-    true
-  }
+  //   docker.download_image(self_ptr.image.clone(), Some(self.role.tag().clone())).await;
+  //   true
+  // }
   
   pub async fn is_healthy(self) -> bool {
     let client = Client::new();

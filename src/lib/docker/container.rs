@@ -7,7 +7,7 @@ use modify::*;
 #[allow(unused_imports)]
 use logger::*;
 
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub enum ContainerRole {
   Main,
   Dev,
@@ -49,7 +49,7 @@ pub struct Container {
   pub name: String,
   pub image: String,
   digest: String,
-  role: ContainerRole,
+  pub role: ContainerRole,
   network_connected: bool,
 }
 

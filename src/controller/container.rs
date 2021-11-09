@@ -126,7 +126,3 @@ pub async fn controller_start_stage() {
   global::GLOBAL_CONTAINER_NGINX_LOCK.get().clone().unwrap().run().await;
   std::thread::sleep(std::time::Duration::from_secs(burn_up_time));
 }
-
-pub async fn controller_nginx_reload_stage() {
-  global::GLOBAL_CONTAINER_NGINX_LOCK.regenerate().await;
-}
