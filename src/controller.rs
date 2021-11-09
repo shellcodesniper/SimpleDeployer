@@ -1,3 +1,5 @@
+use crate::lib::docker::container::ContainerRole;
+
 use super::lib::{ docker, registry, global};
 use chrono::{DateTime, Duration, Utc };
 #[allow(unused_imports)]
@@ -94,8 +96,8 @@ async fn health_check_and_report() {
         debug!("Already Nginx Pointed to Main");
       } else {
         info!("Change Nginx Target To Main & Kill Rolback");
-        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
         global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
+        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
       }
     } else if rollback_healthy {
       warn!("Rollback is Healthy & Main is UnHealthy");
@@ -107,13 +109,14 @@ async fn health_check_and_report() {
         debug!("Already Nginx Pointed to Rollback");
       } else {
         info!("Change Nginx Target To Main & Kill Rolback");
-        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(rollback_container_role);
         global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip(), None).await;
+        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(rollback_container_role);
       }
     }else {
       error!("Main and Rollback is not Healthy");
       global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
+      global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::None);
       error!("Just Tried to Wake up Main & Rollback Service, Hope to God");
     }
   }
