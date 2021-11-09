@@ -22,6 +22,9 @@ RUN cargo build --release --target x86_64-unknown-linux-musl --verbose --target-
 # our final base
 FROM rust:alpine
 
+RUN mkdir /app
+WORKDIR /app
+
 # copy the build artifact from the build stage
 COPY --from=build /app/entrypoint .
 
