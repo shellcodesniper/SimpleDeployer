@@ -10,6 +10,8 @@ cp -rf ./nginx_template/ssl/* /tmp/kuuwange/nginx/
 cp ./config.cfg /tmp/kuuwange/config.cfg
 cp ./regenerate.sh /tmp/kuuwange/nginx/
 
+docker pull shellcodesniper/simpledeploy:stable
+
 docker run -d --rm --name deployer \
   --network=overlay \
   -v /tmp/kuuwange/:/tmp/kuuwange \
