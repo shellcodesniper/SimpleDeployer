@@ -1414,14 +1414,14 @@ dependencies = [
 
 [[package]]
 name = "simple-deployer"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "chrono",
  "chrono-tz",
  "configparser",
  "cron-parser",
  "fs_extra",
- "futures 0.3.17",
+ "futures 0.1.31",
  "hyper",
  "hyper-tls",
  "lazy_static",
