@@ -93,7 +93,7 @@ impl Container {
         .network_mode("overlay")
         .volumes(vec!["/tmp/kuuwange/:/tmp/kuuwange/"])
         .expose(3000, "tcp", rng.gen_range(16300..17000))
-        // .auto_remove(true)
+        .auto_remove(true)
         .build()
     };
       

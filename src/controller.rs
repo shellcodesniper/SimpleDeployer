@@ -87,8 +87,11 @@ async fn health_check_and_report() {
         global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
         global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
       }
-      debug!("Kill Rollback");
-      global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().stop_self().await;
+      debug!("Kill Rollback & Recreate ");
+      let rollback_container = global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap();
+      let rollback_container = rollback_container.recreate();
+      global::GLOBAL_CONTAINER_ROLLBACK_LOCK.set(Some(rollback_container));
+      // NOTE re create rollback ( because rollback will be killed > it will be removed )
     } else if main_healthy {
       debug!("Only Main Healthy");
       let main_container_role = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap().role;
@@ -121,6 +124,10 @@ async fn health_check_and_report() {
       }
     } else {
       error!("Main and Rollback is not Healthy");
+      let main_container = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap();
+      let main_container = main_container.recreate();
+      global::GLOBAL_CONTAINER_MAIN_LOCK.set(Some(main_container));
+      // NOTE re create main ( because main is not healthy before )
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
       // global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::None);
 

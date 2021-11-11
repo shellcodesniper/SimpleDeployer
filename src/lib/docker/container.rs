@@ -103,4 +103,59 @@ impl Container {
 
     changed_container
   }  
+
+  pub fn recreate(&self) -> Container {
+    let docker = self.docker.clone();
+    let id = String::new();
+    let name = self.name.clone();
+    let image = self.image.clone();
+    let digest = String::new();
+    let role = self.role.clone();
+    let network_connected = self.network_connected.clone();
+
+    let self_ptr = self.clone();
+    // NOTE 이건 컨테이너 종료에 사용
+
+    let new_container = Container {
+      docker,
+      id,
+      name,
+      image,
+      digest,
+      role,
+      network_connected,
+    };
+    debug!("CONTAINER CREATE! container_id : {} name : {} digest: {}", new_container.id, new_container.name, new_container.digest);
+
+    let mut this_container_ptr = new_container.clone();
+
+    let changed_container = std::thread::spawn(move || {
+      let create_result = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async {
+          self_ptr.stop_self().await;
+          warn!("Kill Default Container & Create New Same Container");
+
+          let create_result = this_container_ptr.clone().create_container().await;
+          create_result
+        });
+
+      if let Some(x) = create_result {
+        info!("Creation result: {}", x);
+        this_container_ptr.id = x.clone().to_owned();
+        debug!("PTR_ID : {}", this_container_ptr.id);
+      } else {
+        error!("Creation result : Failed..");
+        error!("Please Check Config");
+      };
+
+      this_container_ptr
+    }).join().unwrap();
+
+    debug!("ID result : {}", changed_container.id.clone());
+
+    changed_container
+  }
 }
