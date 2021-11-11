@@ -87,7 +87,7 @@ async fn health_check_and_report() {
         global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
         global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
       }
-      debug!("Kill Rolback");
+      debug!("Kill Rollback");
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().stop_self().await;
     } else if main_healthy {
       debug!("Main is Healthy & Rollback is UnHealthy -> Keep Going!");
