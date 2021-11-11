@@ -19,6 +19,7 @@ pub struct SystemStatus {
   pub rollback_ip: Option<String>,
   pub nginx: HealthyStatus,
   pub nginx_target_role: ContainerRole,
+  pub nginx_target_ip: String,
 }
 
 impl SystemStatus {
@@ -31,6 +32,7 @@ impl SystemStatus {
       rollback_ip: None,
       nginx: HealthyStatus::Ready,
       nginx_target_role: ContainerRole::Main,
+      nginx_target_ip: String::from(""),
     }
   }
 

@@ -163,14 +163,19 @@ impl Container {
     let container_id = self_ptr.clone().id.clone();
     let exec_opts = ExecContainerOptions::builder()
       .cmd(commands)
-      .attach_stdout(false)
-      .attach_stderr(false)
+      .attach_stdout(true)
+      .attach_stderr(true)
       .build();
     
     while let Some(exec_result) = self_ptr.docker.docker.containers().get(&container_id).exec(&exec_opts).next().await {
       match exec_result {
-        Ok(chunk) => print_chunk(chunk),
-        Err(e) => error!("Error On Execute Command\n{}", e),
+        Ok(chunk) => {
+          print_chunk(chunk);
+          break;
+        },
+        Err(e) => {
+          error!("Error On Execute Command\n{}", e);
+        },
       }
     };
   }
