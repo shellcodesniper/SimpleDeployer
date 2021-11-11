@@ -90,32 +90,34 @@ async fn health_check_and_report() {
       debug!("Kill Rollback");
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().stop_self().await;
     } else if main_healthy {
-      debug!("Main is Healthy & Rollback is UnHealthy -> Keep Going!");
-
+      debug!("Only Main Healthy");
       let main_container_role = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap().role;
-      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+      let main_container_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip();
 
-      if main_container_role.clone().name() == current_nginx_role.name() {
-        debug!("Already Nginx Pointed to Main");
+      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+      let current_nginx_target_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_ip();
+      if main_container_role.clone().name() == current_nginx_role.name() && main_container_ip.is_some() && main_container_ip.unwrap_or(String::from("")) == current_nginx_target_ip {
+        info!("EveryThing Looks Normal");
       } else {
-        info!("Change Nginx Target To Main & Kill Rolback");
-        global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
+        info!("Change Nginx Target To Main");
         global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);
+        global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
       }
     } else if rollback_healthy {
       warn!("Rollback is Healthy & Main is UnHealthy");
-
       let rollback_container_role = global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().role;
-      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+      let rollback_container_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip();
 
-      if rollback_container_role.clone().name() == current_nginx_role.name() {
-        debug!("Already Nginx Pointed to Rollback");
+      let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
+      let current_nginx_target_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_ip();
+      if rollback_container_role.clone().name() == current_nginx_role.clone().name() && rollback_container_ip.is_some() && rollback_container_ip.unwrap_or(String::from("")) == current_nginx_target_ip {
+          debug!("Already Nginx Pointed to Rollback");
       } else {
-        info!("Change Nginx Target To Main & Kill Rolback");
+        info!("Change Nginx Target To Rollback");
+        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(rollback_container_role.clone());
         global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip(), None).await;
-        global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(rollback_container_role);
       }
-    }else {
+    } else {
       error!("Main and Rollback is not Healthy");
       global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
