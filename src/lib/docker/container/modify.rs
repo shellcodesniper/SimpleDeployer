@@ -145,8 +145,10 @@ impl Container {
         let ip = self_ptr.clone().get_ip().await;
         debug!("Started Container Id : {} Ip: {:?}", self_ptr.id, ip);
         if self.clone().role.name() == ContainerRole::Main.name() {
+          info!("global update main Ip");
           global::GLOBAL_SYSTEM_STATUS_LOCK.set_main_ip(ip);
         } else if self.clone().role.name() == ContainerRole::Rollback.name() {
+          info!("global update rollback Ip");
           global::GLOBAL_SYSTEM_STATUS_LOCK.set_rollback_ip(ip);
         }
       },
