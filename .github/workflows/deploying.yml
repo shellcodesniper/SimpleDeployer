@@ -37,8 +37,8 @@ jobs:
           tags: |
             shellcodesniper/simpledeploy:stable
             shellcodesniper/simpledeploy:v${{ steps.extract_version.outputs.version }}
-          cache-from: type=local,src=/tmp/.buildx-cache-simple-stable
-          cache-to: type=local,dest=/tmp/.buildx-cache-new-simple-stable,mode=max
+          cache-from: type=local,src=/tmp/.buildx-cache-simple
+          cache-to: type=local,dest=/tmp/.buildx-cache-new-simple,mode=max
       - 
         name: MAKE RELEASE DATE
         id: date
@@ -60,4 +60,4 @@ jobs:
         name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new-simple-stable /tmp/.buildx-cache-simple-stable
+          mv /tmp/.buildx-cache-new-simple /tmp/.buildx-cache-simple
