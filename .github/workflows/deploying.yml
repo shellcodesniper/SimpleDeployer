@@ -37,6 +37,8 @@ jobs:
           tags: |
             shellcodesniper/simpledeploy:stable
             shellcodesniper/simpledeploy:v${{ steps.extract_version.outputs.version }}
+          cache-from: type=local,src=/tmp/.buildx-cache-simple-stable
+          cache-to: type=local,dest=/tmp/.buildx-cache-new-simple-stable,mode=max
       - 
         name: MAKE RELEASE DATE
         id: date
@@ -51,3 +53,11 @@ jobs:
           release_name: Release v${{ steps.extract_version.outputs.version }} [${{ env.release_time }}]
           body: AUTO RELEASE MADE FROM workflows
           draft: true
+      -
+        # Temp fix
+        # https://github.com/docker/build-push-action/issues/252
+        # https://github.com/moby/buildkit/issues/1896
+        name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new-simple-stable /tmp/.buildx-cache-simple-stable
