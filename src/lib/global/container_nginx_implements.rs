@@ -38,7 +38,7 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
       if let Some(target) = container_target {
         GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target_ip(target.clone());
         let command_arg = format!("TARGET_CONTAINER={}", target).clone().to_owned();
-        let command_export = format!("'export {}; /etc/nginx/regenerate.sh'", command_arg);
+        let command_export = format!("'{} /etc/nginx/regenerate.sh'", command_arg);
         let command = vec!["/bin/sh", "-c", command_export.as_str()];
         debug!("{:?}", command);
         nginx.clone().execute_command(command).await;
@@ -46,7 +46,7 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
 
       if let Some(target) = container_target_port {
         let command_arg = format!("TARGET_PORT={}", target).clone().to_owned();
-        let command_export = format!("export {}; /etc/nginx/regenerate.sh", command_arg);
+        let command_export = format!("{} /etc/nginx/regenerate.sh", command_arg);
         let command = vec!["/bin/sh", "-c", command_export.as_str()];
         nginx.execute_command(command).await;
       }
