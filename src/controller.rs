@@ -112,6 +112,8 @@ async fn health_check_and_report() {
       let current_nginx_target_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_ip();
       if rollback_container_role.clone().name() == current_nginx_role.clone().name() && rollback_container_ip.is_some() && rollback_container_ip.unwrap_or(String::from("")) == current_nginx_target_ip {
           debug!("Already Nginx Pointed to Rollback");
+          global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
+          warn!("Trying To Re-Start Main Container!");
       } else {
         info!("Change Nginx Target To Rollback");
         global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(rollback_container_role.clone());
@@ -119,13 +121,12 @@ async fn health_check_and_report() {
       }
     } else {
       error!("Main and Rollback is not Healthy");
-      global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
       // global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::None);
 
-      global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::Main);
-      global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
-      error!("Just Tried to Wake up Main & Rollback Service, Hope to God");
+      global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::Rollback);
+      global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip(), None).await;
+      error!("Just Tried to Wake up Rollback Service, Hope to God");
     }
   }
 }
