@@ -123,6 +123,7 @@ async fn health_check_and_report() {
 }
 
 async fn check_update_and_update_container() {
+  info!("===UPDATE  CHECK===");
 
   let docker = global::GLOBAL_DOCKER_LOCK.get().clone();
   let config = global::GLOBAL_PARSED_CONFIG_LOCK.get().clone();
