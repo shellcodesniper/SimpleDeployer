@@ -171,6 +171,7 @@ impl Container {
       match exec_result {
         Ok(chunk) => {
           print_chunk(chunk);
+          break;
         },
         Err(e) => {
           error!("Error On Execute Command\n{}", e);
