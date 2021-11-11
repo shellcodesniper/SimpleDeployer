@@ -76,9 +76,12 @@ async fn health_check_and_report() {
     if main_healthy && rollback_healthy {
       debug!("Main and Rollback is healthy");
       let main_container_role = global::GLOBAL_CONTAINER_MAIN_LOCK.get().unwrap().role;
+      let main_container_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip();
+
       let current_nginx_role= global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_target();
-      if main_container_role.clone().name() == current_nginx_role.name() {
-        debug!("Already Nginx Pointed to Main");
+      let current_nginx_target_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_nginx_ip();
+      if main_container_role.clone().name() == current_nginx_role.name() && main_container_ip.is_some() && main_container_ip.unwrap_or(String::from("")) == current_nginx_target_ip {
+          debug!("Already Nginx Pointed to Main");
       } else {
         info!("Change Nginx Target To Main");
         global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(main_container_role);

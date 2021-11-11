@@ -67,6 +67,12 @@ impl GLOBAL_SYSTEM_STATUS_LOCK {
     let mut x = next_lock.write().unwrap();
     x.nginx = health;
   }
+  pub fn set_nginx_target_ip(&self, ip: String) {
+    let next = (*self).clone();
+    let next_lock = Arc::clone(&next);
+    let mut x = next_lock.write().unwrap();
+    x.nginx_target_ip = ip;
+  }
 
   pub fn get_main(&self) -> HealthyStatus {
     let next = (*self).clone();
@@ -123,6 +129,15 @@ impl GLOBAL_SYSTEM_STATUS_LOCK {
     let x = wrapped_value.deref();
     let x = x.clone();
     x.nginx_target_role.clone()
+  }
+
+  pub fn get_nginx_ip(&self) -> String {
+    let next = (*self).clone();
+    let next_lock = Arc::clone(&next);
+    let wrapped_value = WrapIt::Read(next_lock.read().unwrap());
+    let x = wrapped_value.deref();
+    let x = x.clone();
+    x.nginx_target_ip.clone()
   }
 
   pub fn is_updating(&self) -> bool {
