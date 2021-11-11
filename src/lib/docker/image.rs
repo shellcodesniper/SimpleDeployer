@@ -1,4 +1,4 @@
-use futures::StreamExt;
+use futures_util::stream::StreamExt;
 use shiplift::{PullOptions};
 
 
