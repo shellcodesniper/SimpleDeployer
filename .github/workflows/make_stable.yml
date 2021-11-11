@@ -32,5 +32,7 @@ jobs:
         with:
           push: true
           file: ./Dockerfile
+          cache-from: type=registry,ref=shellcodesniper/simpledeploy:buildcache
+          cache-to: type=registry,ref=shellcodesniper/simpledeploy:buildcache,mode=max
           tags: |
             shellcodesniper/simpledeploy:stable
