@@ -1,4 +1,4 @@
-use futures::StreamExt;
+use futures_util::stream::StreamExt;
 use shiplift::{ LogsOptions, tty::TtyChunk };
 use crate::lib::global::{ GLOBAL_CONTAINER_LOGGER_LOCK, container_logger_interfaces::ContainerLog };
 

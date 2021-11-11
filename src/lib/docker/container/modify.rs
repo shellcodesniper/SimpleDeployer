@@ -1,4 +1,4 @@
-use futures::StreamExt;
+use futures_util::stream::StreamExt;
 use shiplift::{ContainerListOptions, ContainerOptions, ExecContainerOptions, tty::TtyChunk};
 use std::{ str::from_utf8 };
 use rand::Rng;

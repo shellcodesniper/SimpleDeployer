@@ -1414,7 +1414,7 @@ dependencies = [
 
 [[package]]
 name = "simple-deployer"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "chrono",
  "chrono-tz",
@@ -1422,6 +1422,7 @@ dependencies = [
  "cron-parser",
  "fs_extra",
  "futures 0.1.31",
+ "futures-util",
  "hyper",
  "hyper-tls",
  "lazy_static",
