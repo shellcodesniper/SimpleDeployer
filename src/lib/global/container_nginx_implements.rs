@@ -22,23 +22,14 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
     *x = new.clone().to_owned();
   }
 
-  pub async fn regenerate(&self) {
-    let nginx_container = self.get();
-    if let Some(nginx) = nginx_container {
-      let command = vec!["sh", "/etc/nginx/regenerate.sh"];
-      nginx.execute_command(command).await;
-    }
-  }
-
   pub async fn change_target(&self, container_target: Option<String>, container_target_port: Option<String>) {
     let nginx_container= self.get();
-    println!("NGINX ? : {}", nginx_container.is_some());
     if let Some(nginx) = nginx_container {
       debug!("NGINX!!");
       if let Some(target) = container_target {
         GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target_ip(target.clone());
-        let command_arg = format!("TARGET_CONTAINER={}", target).clone().to_owned();
-        let command_export = format!("'{} /etc/nginx/regenerate.sh'", command_arg);
+        let command_arg = format!("export TARGET_CONTAINER={}", target).clone().to_owned();
+        let command_export = format!("{}; /etc/nginx/regenerate.sh", command_arg);
         let command = vec!["/bin/sh", "-c", command_export.as_str()];
         debug!("{:?}", command);
         nginx.clone().execute_command(command).await;
@@ -46,11 +37,10 @@ impl GLOBAL_CONTAINER_NGINX_LOCK {
 
       if let Some(target) = container_target_port {
         let command_arg = format!("TARGET_PORT={}", target).clone().to_owned();
-        let command_export = format!("{} /etc/nginx/regenerate.sh", command_arg);
+        let command_export = format!("{}; /etc/nginx/regenerate.sh", command_arg);
         let command = vec!["/bin/sh", "-c", command_export.as_str()];
         nginx.execute_command(command).await;
       }
     }
-    self.regenerate().await;
   }
 }

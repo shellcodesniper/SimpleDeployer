@@ -121,7 +121,10 @@ async fn health_check_and_report() {
       error!("Main and Rollback is not Healthy");
       global::GLOBAL_CONTAINER_MAIN_LOCK.get().clone().unwrap().run().await;
       global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().clone().unwrap().run().await;
-      global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::None);
+      // global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::None);
+
+      global::GLOBAL_SYSTEM_STATUS_LOCK.set_nginx_target(ContainerRole::Main);
+      global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
       error!("Just Tried to Wake up Main & Rollback Service, Hope to God");
     }
   }
