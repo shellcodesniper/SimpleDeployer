@@ -104,7 +104,7 @@ async fn health_check_and_report() {
         global::GLOBAL_CONTAINER_NGINX_LOCK.change_target(global::GLOBAL_SYSTEM_STATUS_LOCK.get_main_ip(), None).await;
       }
     } else if rollback_healthy {
-      warn!("Rollback is Healthy & Main is UnHealthy");
+      warn!("Only Rollback is Healthy");
       let rollback_container_role = global::GLOBAL_CONTAINER_ROLLBACK_LOCK.get().unwrap().role;
       let rollback_container_ip = global::GLOBAL_SYSTEM_STATUS_LOCK.get_rollback_ip();
 
