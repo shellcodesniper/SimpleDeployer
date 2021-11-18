@@ -153,7 +153,11 @@ impl Container {
         }
       },
       Err(e) => {
-        error!("{:?}", e);
+        // NOTE recreate self when fail
+        error!("Running Error\n{:?}", e);
+        self_ptr.clone().stop_self().await;
+        let main_container = self_ptr.recreate();
+        global::GLOBAL_CONTAINER_MAIN_LOCK.set(Some(main_container));
       }
     }
   }
