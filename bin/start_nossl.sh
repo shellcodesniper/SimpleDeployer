@@ -4,6 +4,7 @@ docker network create --opt encrypted --driver overlay --attachable overlay
 rm -rf /tmp/kuuwange/
 mkdir -p /tmp/kuuwange/nginx/
 mkdir -p /tmp/kuuwange/certs/
+mkdir -p $(pwd)/logs/
 
 cp -rf ./nginx_template/nossl/* /tmp/kuuwange/nginx/
 cp ./config.cfg /tmp/kuuwange/config.cfg
@@ -14,6 +15,7 @@ docker pull shellcodesniper/simpledeploy:stable
 docker run -d --rm --name deployer \
   --network=overlay \
   -v /tmp/kuuwange/:/tmp/kuuwange \
+  -v $(pwd)/logs/:/app/logs/ \
   -v /var/run/docker.sock:/var/run/docker.sock \
     shellcodesniper/simpledeploy:stable \
       /tmp/kuuwange/config.cfg

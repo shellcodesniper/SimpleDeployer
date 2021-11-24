@@ -197,5 +197,7 @@ pub async fn entrypoint(main_docker: docker::Docker, registry: registry::Registr
   container::controller_start_stage().await;
   // start main, nginx
 
-  control_loop().await;
+  loop {
+    control_loop().await;
+  }
 }
