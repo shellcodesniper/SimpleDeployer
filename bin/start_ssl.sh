@@ -19,4 +19,4 @@ docker run -d --name deployer \
   -v /var/run/docker.sock:/var/run/docker.sock \
   -v $(pwd)/logs/:/app/logs \
     shellcodesniper/simpledeploy:arm \
-      /etc/kuuwange/config.cfg
+  /etc/kuuwange/config.cfg

@@ -1,19 +1,7 @@
-FROM ubuntu:21.10 as build
-
-# Update default packages
-#RUN  sed -i 's/http:\/\//https:\/\//g' /etc/apt/sources.list
+FROM rust:buster as build
 RUN apt-get update
-RUN apt-get install -y \
-    build-essential \
-    curl libssl-dev musl-dev tzdata perl gcc g++ make libffi-dev libtool autoconf automake
-
-# Update new packages
-RUN apt-get update
-
-# Get Rust
-RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
-
-RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
+#RUN apk add --no-cache musl-dev tzdata perl gcc g++ make libffi-dev libtool autoconf automake curl gcc-arm-none-eabi
+RUN apt-get install -y musl-dev build-essential libtool libffi-dev make autoconf automake curl
 
 RUN mkdir /app
 WORKDIR /app
@@ -25,13 +13,18 @@ RUN cargo init ./ --bin --edition 2018
 COPY ./Cargo.lock /app/Cargo.lock
 COPY ./Cargo.toml /app/Cargo.toml
 
+#RUN rustup target add armv7-unknown-linux-musleabihf
+
 RUN cargo build --release --verbose --target-dir "/app/dist" --features vendored
+#RUN cargo build --target=armv7-unknown-linux-musleabihf --release --verbose --target-dir "/app/dist" --features vendored
+
 RUN rm src/*.rs
 
 COPY ./src /app/src
 
+
 RUN rm /app/dist/release/deps/simple_deployer*
-RUN cargo build --release --verbose --target-dir "/app/dist" --features vendored && mv /app/dist/release/simple-deployer /app/entrypoint && rm -rf /app/dist/
+RUN cargo build --release --verbose --target-dir "/app/dist" --features vendored && ls /app/dist/ && mv /app/dist/release/simple-deployer /app/entrypoint && rm -rf /app/dist/
 
 # our final base
 FROM rust:buster
