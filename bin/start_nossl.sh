@@ -1,6 +1,7 @@
 docker swarm init
 docker network create --opt encrypted --driver overlay --attachable overlay
 
+
 sudo rm -rf /etc/kuuwange/
 sudo mkdir -p /etc/kuuwange/nginx/
 sudo mkdir -p /etc/kuuwange/certs/

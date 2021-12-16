@@ -17,11 +17,12 @@ COPY ./Cargo.toml /app/Cargo.toml
 
 RUN cargo build --release --verbose --target-dir "/app/dist" --features vendored
 #RUN cargo build --target=armv7-unknown-linux-musleabihf --release --verbose --target-dir "/app/dist" --features vendored
+
 RUN rm src/*.rs
 
 COPY ./src /app/src
 
-RUN ls /app/dist
+
 RUN rm /app/dist/release/deps/simple_deployer*
 RUN cargo build --release --verbose --target-dir "/app/dist" --features vendored && ls /app/dist/ && mv /app/dist/release/simple-deployer /app/entrypoint && rm -rf /app/dist/
 
