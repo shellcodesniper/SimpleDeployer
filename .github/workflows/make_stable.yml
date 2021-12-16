@@ -44,3 +44,15 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache-simple
           mv /tmp/.buildx-cache-new-simple /tmp/.buildx-cache-simple
+      -
+        name: SSH BUILD!
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd /home/opc/SimpleDeployer
+            git stash
+            git pull
+            ./bin/build_for_arm.sh
+          host: ${{ secrets.SSH__HOST }}
+          user: opc
+          key: ${{ secrets.PRIVATE_KEY}}
