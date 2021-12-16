@@ -53,6 +53,6 @@ jobs:
             git stash
             git pull
             ./bin/build_for_arm.sh
-          host: ${{ secrets.SSH__HOST }}
+          host: ${{ secrets.SSH_HOST }}
           user: opc
           key: ${{ secrets.PRIVATE_KEY}}
