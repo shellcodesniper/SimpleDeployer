@@ -46,4 +46,4 @@ jobs:
         name: Move cache
         run: |
           rm -rf /tmp/.buildx-cache-simple
-          mv /tmp/.buildx-cache-new-simple /tmp/.buildx-cache-simple
+          mv -f /tmp/.buildx-cache-new-simple /tmp/.buildx-cache-simple
