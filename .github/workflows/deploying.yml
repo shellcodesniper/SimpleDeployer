@@ -21,6 +21,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           user: opc
           key: ${{ secrets.PRIVATE_KEY}}
+          args: "-tt"
       - name: Checkout code
         uses: actions/checkout@master
       -
