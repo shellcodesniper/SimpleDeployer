@@ -9,6 +9,18 @@ jobs:
     runs-on: self-hosted
     # runs-on: ubuntu-latest
     steps:
+      -
+        name: SSH BUILD!
+        uses: fifsky/ssh-action@master
+        with:
+          command: |
+            cd /home/opc/SimpleDeployer
+            git stash
+            git pull
+            ./bin/build_for_arm.sh
+          host: ${{ secrets.SSH_HOST }}
+          user: opc
+          key: ${{ secrets.PRIVATE_KEY}}
       - name: Checkout code
         uses: actions/checkout@master
       -
@@ -61,15 +73,3 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new-simple /tmp/.buildx-cache-simple
-      -
-        name: SSH BUILD!
-        uses: fifsky/ssh-action@master
-        with:
-          command: |
-            cd /home/opc/SimpleDeployer
-            git stash
-            git pull
-            ./bin/build_for_arm.sh
-          host: ${{ secrets.SSH_HOST }}
-          user: opc
-          key: ${{ secrets.PRIVATE_KEY}}
