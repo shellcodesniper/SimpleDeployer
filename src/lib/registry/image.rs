@@ -38,7 +38,16 @@ impl Registry {
       .header("Authorization", format!("Bearer {}", token))
       .body(Body::from(""))
       .unwrap();
-    let req = client.request(req).await.unwrap();
+    let req = client.request(req).await;
+    if let Err(e) = req {
+      return IGetDigestResult {
+        found: false,
+        digest: None,
+        image_url: image_url,
+        tag: search_target_tag,
+      }
+    }
+    let req = req.unwrap();
     
     let res_body =  hyper::body::to_bytes(req.into_body()).await.unwrap();
     let res_string = String::from_utf8(res_body.to_vec()).unwrap();
