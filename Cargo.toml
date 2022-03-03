@@ -1,8 +1,17 @@
 [package]
 name = "simple-deployer"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 author = "KuuWangE"
+
+[features]
+vendored = ["openssl-sys/vendored"]
+
+[profile.dev]
+opt-level = 1
+
+[profile.release]
+opt-level = 3
 
 [dependencies]
 configparser = "3.0.0"
@@ -24,6 +33,3 @@ openssl-sys = "*"
 chrono = "0"
 chrono-tz = { version = "0", features = ["serde"] }
 cron-parser = "0"
-
-[features]
-vendored = ["openssl-sys/vendored"]
