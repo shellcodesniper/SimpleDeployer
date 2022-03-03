@@ -11,6 +11,8 @@ cp -rf ./certs/* /etc/kuuwange/certs/
 cp -rf ./nginx_template/ssl/* /etc/kuuwange/nginx/
 cp ./config.cfg /etc/kuuwange/config.cfg
 cp ./regenerate.sh /etc/kuuwange/nginx/
+touch /etc/kuuwange/.env
+cp .env /etc/kuuwange/.env
 
 docker pull shellcodesniper/simpledeploy:arm
 docker run -d --name deployer \

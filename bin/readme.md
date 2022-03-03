@@ -10,3 +10,9 @@ just mv nginx_template/nossl to nginx folder
 ./start_nossl.sh or ./start_ssl.sh to deploy!
 
 Done!
+
+
+
+if you want to use .env
+
+replace .env file
