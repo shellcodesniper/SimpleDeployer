@@ -91,7 +91,7 @@ impl Container {
       ContainerOptions::builder(&image_selected_url)
         .name(&server_name)
         .network_mode("overlay")
-        .volumes(vec!["/etc/kuuwange/:/etc/kuuwange/"])
+        .volumes(vec!["/etc/kuuwange/:/etc/kuuwange/", "/etc/kuuwange/.env:/app/.env"])
         .expose(3000, "tcp", rng.gen_range(16300..17000))
         .auto_remove(true)
         .build()
