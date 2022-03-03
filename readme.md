@@ -4,6 +4,9 @@
 
 
 
+## To USE .env FILE
+- place ".env" in ROOT DIRECTORY
+
 
 
 
