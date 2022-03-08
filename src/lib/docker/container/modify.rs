@@ -82,6 +82,7 @@ impl Container {
         .network_mode("overlay")
         .env(vec!["TARGET_CONTAINER=server_main", "TARGET_PORT=3000"])
         .links(vec!["server_main", "server_rollback"])
+        .extra_hosts(vec!["kafka01:52.78.166.143","kafka02:13.125.224.110","kafka03:13.209.17.184","zookeeper01:152.70.253.108","zookeeper02:132.145.93.74","zookeeper03:132.226.233.105"])
         .volumes(vec!["/etc/kuuwange/certs/:/etc/certs/", "/etc/kuuwange/nginx/nginx.conf:/etc/nginx/nginx.conf", "/etc/kuuwange/nginx/templates/:/etc/nginx/templates/", "/etc/kuuwange/nginx/regenerate.sh:/etc/nginx/regenerate.sh"])
         .expose(80, "tcp", 80)
         .expose(443, "tcp", 443)
