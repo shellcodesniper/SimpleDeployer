@@ -11,6 +11,8 @@ mkdir -p $(pwd)/logs/
 cp -rf ./nginx_template/nossl/* /etc/kuuwange/nginx/
 cp ./config.cfg /etc/kuuwange/config.cfg
 cp ./regenerate.sh /etc/kuuwange/nginx/
+touch /etc/kuuwange/.env
+cp .env /etc/kuuwange/.env
 
 docker pull shellcodesniper/simpledeploy:stable
 
