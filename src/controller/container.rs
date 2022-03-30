@@ -42,7 +42,7 @@ pub async fn controller_check_outdated_and_pull_for_start() {
   } else {
     error!("Unable To Check Registry [Main] Image");
     error!("please check your registry_target_repo setting");
-    std::process::exit(-1);
+    // std::process::exit(-1);
   }
   if image_main_need_download {
     controller_download_stage(image_base_url.clone(), main_image_tag.clone()).await;
@@ -75,7 +75,7 @@ pub async fn controller_check_outdated_and_pull_for_start() {
   } else {
     error!("Unable To Check Registry [Rollback] Image");
     error!("please check your registry_target_repo setting");
-    std::process::exit(-1);
+    // std::process::exit(-1);
   }
   if image_rollback_need_download {
     controller_download_stage(image_base_url.clone(), rollback_image_tag.clone()).await;
