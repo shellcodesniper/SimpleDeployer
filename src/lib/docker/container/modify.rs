@@ -93,7 +93,7 @@ impl Container {
         .network_mode("overlay")
         .volumes(vec!["/etc/kuuwange/:/etc/kuuwange/", "/etc/kuuwange/.env:/app/.env"])
         .expose(3000, "tcp", rng.gen_range(16300..17000))
-        .extra_hosts(vec!["kafka01:52.78.166.143","kafka02:13.125.224.110","kafka03:13.209.17.184","zookeeper01:152.70.253.108","zookeeper02:132.145.93.74","zookeeper03:132.226.233.105"])
+        // .extra_hosts(vec!["kafka01:52.78.166.143","kafka02:13.125.224.110","kafka03:13.209.17.184","zookeeper01:152.70.253.108","zookeeper02:132.145.93.74","zookeeper03:132.226.233.105"])
         .auto_remove(true)
         .build()
     };
