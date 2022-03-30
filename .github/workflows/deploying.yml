@@ -72,5 +72,5 @@ jobs:
         # https://github.com/moby/buildkit/issues/1896
         name: Move cache
         run: |
-          rm -rf /tmp/.buildx-cache
+          rm -rf /tmp/.buildx-cache-simple
           mv -f /tmp/.buildx-cache-new-simple /tmp/.buildx-cache-simple
