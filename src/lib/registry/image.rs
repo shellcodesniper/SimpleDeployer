@@ -40,6 +40,7 @@ impl Registry {
       .unwrap();
     let req = client.request(req).await;
     if let Err(e) = req {
+      error!("{:?}", e);
       return IGetDigestResult {
         found: false,
         digest: None,
@@ -51,6 +52,7 @@ impl Registry {
     
     let res_body =  hyper::body::to_bytes(req.into_body()).await.unwrap();
     let res_string = String::from_utf8(res_body.to_vec()).unwrap();
+    debug!("{:?}" ,res_string);
     let result = serde_json::from_str(&res_string);
 
 

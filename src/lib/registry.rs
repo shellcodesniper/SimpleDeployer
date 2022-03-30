@@ -39,42 +39,43 @@ impl Registry {
 
     let username = (self.username.clone().to_owned()).unwrap_or(String::from("anonymous"));
     let password= (self.password.clone().to_owned()).unwrap_or(String::from("anonymous"));
-    debug!("42 line");
+    // debug!("42 line");
 
     let request_body = request_interfaces::RequestLogin {
       username,
       password,
     };
-    debug!("48 line");
+    // debug!("48 line");
 
     let request_body_string = serde_json::to_string(&request_body).unwrap();
-    debug!("51 line");
+    // debug!("51 line");
     
     let https = HttpsConnector::new();
-    debug!("53 line");
+    // debug!("53 line");
     let client = Client::builder()
       .build::<_, hyper::Body>(https);
-    debug!("login 57 line");
+    // debug!("login 57 line");
     
     let req = Request::builder()
       .method(Method::POST)
       .uri(url)
       .header("content-type", "application/json")
       .body(Body::from(request_body_string)).unwrap();
-    debug!("login 64 line");
+    // debug!("login 64 line");
     let req = client.request(req).await.unwrap();
-    debug!("login 66 line");
+    // debug!("login 66 line");
 
     let res_body =  hyper::body::to_bytes(req.into_body()).await.unwrap();
     let res_string = String::from_utf8(res_body.to_vec()).unwrap();
     let result: serde_json::Value = serde_json::from_str(&res_string).unwrap();
-    debug!("login 71 line");
+    // debug!("login 71 line");
     if result.get("detail").is_some() {
       error!("Login To Registry Failed.");
       panic!("Please Check Your config");
     }
     let token = result.get("token").unwrap().as_str().unwrap().to_string();
     info!("Success LoggedIn to Registry");
+    // debug!("{}", token);
     (*self).token = Some(token);
   }
 
